@@ -9,7 +9,7 @@
 
 .measurements-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  grid-template-columns: 1fr;
   gap: $spacing-lg;
   justify-items: center;
 }
@@ -17,6 +17,12 @@
 .measurements-empty {
   grid-column: 1 / -1;
   color: $color-text-light;
+}
+
+@media (min-width: 400px) {
+  .measurements-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
 }
 
 @media (min-width: 600px) {
