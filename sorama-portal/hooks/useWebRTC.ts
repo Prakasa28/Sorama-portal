@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { FolderEntry } from "../types/measurements";
+
 
 const SIGNALING_URL = "wss://cloud-signaling-server.onrender.com";
 
@@ -9,6 +11,7 @@ export function useWebRTC() {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RTCDataChannel | null>(null);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const [folders, setFolders] = useState<FolderEntry[]>([]); ;
 
   useEffect(() => {
     const ws = new WebSocket(SIGNALING_URL);
@@ -27,16 +30,25 @@ export function useWebRTC() {
     };
 
     channel.onmessage = (event) => {
-      console.log("Device message:", event.data);
 
-      if (typeof event.data === "string") {
+      if (typeof event.data !== "string"){
+        console.log("Binary data received:", event.data);
+        return;
+      }
+
         try {
           const data = JSON.parse(event.data);
-          console.log("Parsed device message:", data);
+
+          if (data.folderList) {
+            console.log("Received folder list:", data.folderList);
+            setFolders(data.folderList);
+            return;
+          }
+          console.log("Parsed JSON message:", data);
         } catch {
-          console.log("Raw device message:", event.data);
+          console.log("Raw non-JSON message:", event.data);
         }
-      }
+      
     };
 
     pc.onicecandidate = (event) => {
@@ -104,4 +116,5 @@ export function useWebRTC() {
       ws.close();
     };
   }, []);
+  return { folders };
 }
