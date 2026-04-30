@@ -1,14 +1,14 @@
 "use client";
 
 import { useWebRTC } from "../hooks/useWebRTC";
+import { MeasurementsOverview } from "../components/measurementsOverview"
 
 export default function Home() {
   useWebRTC();
   return (
     <div>
       <main>
-        <h1>WebRTC Test</h1>
-        <p>Check the console for WebRTC and signaling logs.</p>
+      <MeasurementsOverview />
       </main>
     </div>
   );

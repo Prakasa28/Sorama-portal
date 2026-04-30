@@ -1,0 +1,32 @@
+
+@use "../abstracts/variables" as *;
+
+.measurements-page {
+  min-height: 100vh;
+  background: $color-bg;
+  padding: $spacing-lg;
+}
+
+.measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: $spacing-lg;
+  justify-items: center;
+}
+
+.measurements-empty {
+  grid-column: 1 / -1;
+  color: $color-text-light;
+}
+
+@media (min-width: 600px) {
+  .measurements-grid {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .measurements-grid {
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
+  }
+}
