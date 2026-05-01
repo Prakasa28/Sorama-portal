@@ -1,0 +1,101 @@
+@use "../abstracts/variables" as *;
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 28px;
+  padding: 2px 2px 6px;
+
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filter-chip-wrapper {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.filter-chip {
+  min-width: 135px;
+  height: 38px;
+  padding: 0 38px 0 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  outline: none;
+
+  background-color: rgba(255, 255, 255, 0.07);
+  color: $color-text-light;
+
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  appearance: none;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.1s ease;
+
+    option {
+        background: $color-surface;
+        color: $color-primary;
+        border-radius: 10px;
+    }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.11);
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+
+  &:focus {
+    border-color: rgba(199, 210, 223, 0.75);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--button {
+    min-width: auto;
+    padding: 0 16px;
+  }
+}
+
+.filter-chip__icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  color: $color-text-light;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .filter-chips {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .filter-chips {
+    justify-content: center;
+  }
+
+  .filter-chip {
+    min-width: 150px;
+    height: 40px;
+    font-size: 14px;
+  }
+}

@@ -17,6 +17,7 @@ export function SearchBar({
 
       <input
         className="search-bar__input"
+        name="search-bar"
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
