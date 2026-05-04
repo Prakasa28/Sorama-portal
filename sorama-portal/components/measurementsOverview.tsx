@@ -11,6 +11,7 @@ import {
   matchesSeverity,
   matchesType,
 } from "../utils/measurementsFilters";
+import{ MobileFilterSheet } from "./mobileFilterSheet";
 
 
 export function MeasurementsOverview() {
@@ -18,7 +19,14 @@ export function MeasurementsOverview() {
    const [search, setSearch] = useState("");
    const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
    const [dateFilter, setDateFilter] = useState<DateFilter>("");
-   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("");  
+   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>(""); 
+   const [isFilterOpen, setIsFilterOpen] = useState(false); 
+
+    const clearFilters = () => {
+    setTypeFilter("");
+    setDateFilter("");
+    setSeverityFilter("");
+  };
 
   const filteredFolders = useMemo(() => {
     return folders.filter((folder) => {
@@ -35,6 +43,20 @@ export function MeasurementsOverview() {
     <main className="measurements-page">
         <SearchBar value={search} onChange={setSearch} placeholder="Search measurements..." />
 
+        <MobileFilterSheet
+        isOpen={isFilterOpen}
+        onOpen={() => setIsFilterOpen(true)}
+        onClose={() => setIsFilterOpen(false)}
+        typeFilter={typeFilter}
+        dateFilter={dateFilter}
+        severityFilter={severityFilter}
+        onTypeChange={setTypeFilter}
+        onDateChange={setDateFilter}
+        onSeverityChange={setSeverityFilter}
+        onClear={clearFilters}
+      />
+
+        <div className="desktop-filters">
         <MeasurementsFilters
           typeFilter={typeFilter}
           dateFilter={dateFilter}
@@ -49,6 +71,9 @@ export function MeasurementsOverview() {
             setSeverityFilter("");
           }}
         />
+        </div>
+
+        
         
         <section className="measurements-grid">
             {folders.length === 0 ? (
