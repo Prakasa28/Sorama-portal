@@ -20,6 +20,12 @@ export function DeviceDiscovery({
   return (
     <main className="device-discovery-page">
       <header className="device-discovery-header">
+        <Image
+          src="/images/icons/sorama-logo.svg"
+          alt="Sorama logo"
+          width={70}
+          height={70}
+        />
         <h1>Welcome to Sorama Portal</h1>
         <p>Select a device to connect</p>
       </header>
