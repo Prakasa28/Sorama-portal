@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useWebRTC } from "../hooks/useWebRTC";
 import { MeasurementCard } from "./measurementCard";
 import { SearchBar } from "./searchBar";
 import { MeasurementsFilters, type DateFilter, type SeverityFilter, type TypeFilter } from "./measurementsFilters";
@@ -12,10 +11,14 @@ import {
   matchesType,
 } from "../utils/measurementsFilters";
 import{ MobileFilterSheet } from "./mobileFilterSheet";
+import type { FolderEntry } from "../types/measurements";
 
+type Props = {
+  folders: FolderEntry[];
+};
 
-export function MeasurementsOverview() {
-  const { folders } = useWebRTC();  
+export function MeasurementsOverview({folders}:Props) {
+   
    const [search, setSearch] = useState("");
    const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
    const [dateFilter, setDateFilter] = useState<DateFilter>("");
@@ -73,9 +76,7 @@ export function MeasurementsOverview() {
             setSeverityFilter("");
           }}
         />
-        </div>
-
-        
+        </div>   
         
         <section className="measurements-grid">
             {folders.length === 0 ? (
