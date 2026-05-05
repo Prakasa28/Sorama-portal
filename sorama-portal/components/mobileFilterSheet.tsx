@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import {
   MeasurementsFilters,
@@ -15,9 +18,12 @@ type Props = {
   dateFilter: DateFilter;
   severityFilter: SeverityFilter;
 
-  onTypeChange: (value: TypeFilter) => void;
-  onDateChange: (value: DateFilter) => void;
-  onSeverityChange: (value: SeverityFilter) => void;
+  onApply: (filters: {
+    typeFilter: TypeFilter;
+    dateFilter: DateFilter;
+    severityFilter: SeverityFilter;
+  }) => void;
+
   onClear: () => void;
 };
 
@@ -28,11 +34,22 @@ export function MobileFilterSheet({
   typeFilter,
   dateFilter,
   severityFilter,
-  onTypeChange,
-  onDateChange,
-  onSeverityChange,
+  onApply,
   onClear,
 }: Props) {
+  const [draftType, setDraftType] = useState<TypeFilter>(typeFilter);
+  const [draftDate, setDraftDate] = useState<DateFilter>(dateFilter);
+  const [draftSeverity, setDraftSeverity] =
+    useState<SeverityFilter>(severityFilter);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setDraftType(typeFilter);
+    setDraftDate(dateFilter);
+    setDraftSeverity(severityFilter);
+  }, [isOpen, typeFilter, dateFilter, severityFilter]);
+
   return (
     <>
       <button type="button" className="mobile-filter-button" onClick={onOpen}>
@@ -59,19 +76,31 @@ export function MobileFilterSheet({
             </div>
 
             <MeasurementsFilters
-              typeFilter={typeFilter}
-              dateFilter={dateFilter}
-              severityFilter={severityFilter}
-              onTypeChange={onTypeChange}
-              onDateChange={onDateChange}
-              onSeverityChange={onSeverityChange}
-              onClear={onClear}
+              typeFilter={draftType}
+              dateFilter={draftDate}
+              severityFilter={draftSeverity}
+              onTypeChange={setDraftType}
+              onDateChange={setDraftDate}
+              onSeverityChange={setDraftSeverity}
+              onClear={() => {
+                setDraftType("");
+                setDraftDate("");
+                setDraftSeverity("");
+              }}
             />
 
             <button
               type="button"
               className="filter-sheet__apply"
-              onClick={onClose}
+              onClick={() => {
+                onApply({
+                  typeFilter: draftType,
+                  dateFilter: draftDate,
+                  severityFilter: draftSeverity,
+                });
+
+                onClose();
+              }}
             >
               Apply Filters
             </button>

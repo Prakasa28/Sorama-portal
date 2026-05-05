@@ -44,17 +44,19 @@ export function MeasurementsOverview() {
         <SearchBar value={search} onChange={setSearch} placeholder="Search measurements..." />
 
         <MobileFilterSheet
-        isOpen={isFilterOpen}
-        onOpen={() => setIsFilterOpen(true)}
-        onClose={() => setIsFilterOpen(false)}
-        typeFilter={typeFilter}
-        dateFilter={dateFilter}
-        severityFilter={severityFilter}
-        onTypeChange={setTypeFilter}
-        onDateChange={setDateFilter}
-        onSeverityChange={setSeverityFilter}
-        onClear={clearFilters}
-      />
+          isOpen={isFilterOpen}
+          onOpen={() => setIsFilterOpen(true)}
+          onClose={() => setIsFilterOpen(false)}
+          typeFilter={typeFilter}
+          dateFilter={dateFilter}
+          severityFilter={severityFilter}
+          onApply={({ typeFilter, dateFilter, severityFilter }) => {
+            setTypeFilter(typeFilter);
+            setDateFilter(dateFilter);
+            setSeverityFilter(severityFilter);
+          }}
+          onClear={clearFilters}
+        />
 
         <div className="desktop-filters">
         <MeasurementsFilters
