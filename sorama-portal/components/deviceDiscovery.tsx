@@ -27,7 +27,6 @@ export function DeviceDiscovery({
           height={70}
         />
         <h1>Welcome to Sorama Portal</h1>
-        <p>Select a device to connect</p>
       </header>
 
       <section className="device-discovery-card">

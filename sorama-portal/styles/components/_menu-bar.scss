@@ -1,0 +1,45 @@
+@use "../abstracts/variables" as *;
+
+.menu-bar {
+  height: $menu-bar-height;
+  padding: 0 $spacing-md;
+
+  display: flex;
+  align-items: center;
+
+  background: #2D3E50;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.menu-bar__brand {
+  display: flex;
+  align-items: center;
+}
+
+.menu-bar__logo {
+  display: block;
+}
+
+/* mobile */
+.menu-bar__logo--desktop {
+  display: none;
+}
+
+.menu-bar__logo--mobile {
+  display: block;
+}
+
+/* Desktop */
+@media (min-width: 600px) {
+  .menu-bar__logo--mobile {
+    display: none;
+  }
+
+  .menu-bar__logo--desktop {
+    display: block;
+  }
+}

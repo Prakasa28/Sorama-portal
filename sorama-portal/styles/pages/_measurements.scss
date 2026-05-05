@@ -2,7 +2,7 @@
 @use "../abstracts/variables" as *;
 
 .measurements-page {
-  min-height: 100vh;
+   min-height: calc(100dvh - $menu-bar-height);
   background: $color-bg;
   padding: $spacing-lg;
 }

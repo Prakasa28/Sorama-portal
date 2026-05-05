@@ -1,7 +1,8 @@
 @use "../abstracts/variables" as *;
 
 .device-discovery-page {
-  min-height: 100vh;
+  min-height: calc(100dvh - $menu-bar-height);
+  overflow: hidden;
   padding: $spacing-lg;
   background: #34495E;
   color: $color-text-light;
