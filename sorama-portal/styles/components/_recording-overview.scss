@@ -1,0 +1,54 @@
+@use "../abstracts/variables" as *;
+
+.recording-back {
+  display: inline-flex;
+  margin: 0 0 24px;
+  border: 0;
+  background: transparent;
+  color: $color-text-light;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.recording-card {
+  width: 100%;
+  max-width: 220px;
+  padding: 10px;
+  border-radius: $radius-md;
+  background: $color-card;
+  color: $color-primary;
+  text-align: center;
+  overflow: hidden;
+
+  &__title {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__preview {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $color-card-alt;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  &__thumbnail {
+    width: auto;
+    height: 100%;
+    display: block;
+  }
+
+  &__loading {
+    font-size: 12px;
+    color: $color-primary;
+  }
+}

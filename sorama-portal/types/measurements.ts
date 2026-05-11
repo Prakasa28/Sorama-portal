@@ -7,7 +7,7 @@ export type FolderEntry = {
   thumbnail?: string;
   image?: string;
   report?: string;
-  metadata: MeasurementMetadata;
+  metadata: MeasurementMetadata | null;
 };
 
 export type MeasurementMetadata = {

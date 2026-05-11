@@ -10,8 +10,12 @@ export default function Home() {
     folders,
     selectedDevice,
     isConnected,
+    thumbnailUrls,
+    requestFile,
     connectToDevice,
     reloadDevices,
+    recordingMetadata,
+    requestMetadata
   } = useWebRTC();
 
   if (!isConnected) {
@@ -28,7 +32,13 @@ export default function Home() {
   return (
     <div>
       <main>
-      <MeasurementsOverview folders={folders} />
+      <MeasurementsOverview
+       folders={folders}
+       thumbnailUrls={thumbnailUrls}
+       requestFile={requestFile}
+       requestMetadata={requestMetadata}
+       recordingMetadata={recordingMetadata}
+       />
       
       </main>
     </div>

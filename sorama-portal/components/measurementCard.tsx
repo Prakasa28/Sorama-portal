@@ -3,11 +3,12 @@ import Image from "next/image";
 
 type Props = {
   folder: FolderEntry;
+  onClick?: () => void;
 };
 
-export function MeasurementCard({ folder }: Props) {
+export function MeasurementCard({ folder, onClick }: Props) {
   return (
-    <article className="measurement-card">
+    <article className="measurement-card" onClick={onClick}>
         <Image 
           src="/images/icons/more.svg" 
           alt="more options" 
