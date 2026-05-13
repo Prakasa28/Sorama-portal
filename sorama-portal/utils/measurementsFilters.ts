@@ -1,4 +1,4 @@
-import type { FolderEntry } from "../types/measurements";
+import type { FolderEntry, MeasurementMetadata } from "../types/measurements";
 import type {
   DateFilter,
   SeverityFilter,
@@ -10,7 +10,10 @@ export function matchesSearch(folder: FolderEntry, search: string) {
 }
 
 export function matchesType(folder: FolderEntry, filter: TypeFilter) {
-  return !filter || folder.metadata.type === filter;
+  if (!filter) return true;
+  if (!folder.metadata) return false;
+
+  return folder.metadata.type === filter;
 }
 
 export function matchesDate(dateTime: string, filter: DateFilter) {
@@ -29,19 +32,26 @@ export function matchesDate(dateTime: string, filter: DateFilter) {
 }
 
 export function matchesSeverity(folder: FolderEntry, filter: SeverityFilter) {
-  return !filter || getSeverity(folder) === filter;
+  if (!filter) return true;
+  if (!folder.metadata) return false;
+
+  return getMetadataSeverity(folder.metadata) === filter;
 }
 
-function getSeverity(folder: FolderEntry): SeverityFilter {
-  if (folder.metadata.type === "leakDetection") {
-    const rate = folder.metadata.ldMetadata?.results.rate ?? 0;
+export function getMetadataSeverity(
+  metadata?: MeasurementMetadata | null
+): SeverityFilter {
+  if (!metadata) return "";
+
+  if (metadata.type === "leakDetection") {
+    const rate = metadata.ldMetadata?.results.rate ?? 0;
 
     if (rate > 15) return "high";
     if (rate > 10) return "medium";
     return "low";
   }
 
-  const external = folder.metadata.pdMetadata?.results.externalPercentage ?? 0;
+  const external = metadata.pdMetadata?.results.externalPercentage ?? 0;
 
   if (external >= 80) return "high";
   if (external >= 40) return "medium";

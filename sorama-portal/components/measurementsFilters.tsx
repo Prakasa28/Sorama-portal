@@ -1,6 +1,12 @@
 import { FilterChip } from "./filterchips";
 
-export type TypeFilter = "" | "leakDetection" | "partialDischarge";
+export type TypeFilter =
+  | ""
+  | "leakDetection"
+  | "partialDischarge"
+  | "severityIndex"
+  | "image"
+  | "video";
 export type DateFilter = "" | "24h" | "7d" | "30d";
 export type SeverityFilter = "" | "low" | "medium" | "high";
 
@@ -34,6 +40,9 @@ export function MeasurementsFilters({
           { label: "All Types", value: "" },
           { label: "Leak Detection", value: "leakDetection" },
           { label: "Partial Discharge", value: "partialDischarge" },
+          { label: "Severity Index", value: "severityIndex" },
+          { label: "Image", value: "image" },
+          { label: "Video", value: "video" },
         ]}
       />
 

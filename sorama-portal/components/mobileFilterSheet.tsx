@@ -23,8 +23,6 @@ type Props = {
     dateFilter: DateFilter;
     severityFilter: SeverityFilter;
   }) => void;
-
-  onClear: () => void;
 };
 
 export function MobileFilterSheet({
@@ -35,7 +33,6 @@ export function MobileFilterSheet({
   dateFilter,
   severityFilter,
   onApply,
-  onClear,
 }: Props) {
   const [draftType, setDraftType] = useState<TypeFilter>(typeFilter);
   const [draftDate, setDraftDate] = useState<DateFilter>(dateFilter);

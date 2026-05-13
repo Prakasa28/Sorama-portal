@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { FolderEntry } from "../types/measurements";
 import { SearchBar } from "./searchBar";
+import { matchesDate, getMetadataSeverity, } from "../utils/measurementsFilters";
+import {
+  MeasurementsFilters,
+  type DateFilter,
+  type SeverityFilter,
+  type TypeFilter,
+} from "./measurementsFilters";
+import { MobileFilterSheet } from "./mobileFilterSheet";
+
 
 type Props = {
   folder: FolderEntry;
@@ -26,9 +35,47 @@ export function RecordingOverview({
   requestMetadata,
   onBack,
 }: Props) {
-  const filteredRecordings = folder.files.filter((recordingName) =>
-    recordingName.toLowerCase().includes(search.toLowerCase().trim())
+
+const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
+const [dateFilter, setDateFilter] = useState<DateFilter>("");
+const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("");
+const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  
+const filteredRecordings = folder.files.filter((recordingName) => {
+  const recordingPath = `${folder.name}/${recordingName}`;
+  const metadataKey = `${recordingPath}/metadata.json`;
+  const metadata = recordingMetadata[metadataKey];
+  const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
+  const thumbnailUrl = thumbnailUrls[thumbnailKey];
+
+  console.log("Recording filter debug:", {
+  recordingName,
+  metadataKey,
+  metadata,
+});
+
+  const matchesSearchValue = recordingName
+    .toLowerCase()
+    .includes(search.toLowerCase().trim());
+
+  const matchesTypeValue =
+  !typeFilter || metadata?.type === typeFilter;
+
+  const matchesDateValue =
+    !dateFilter || (metadata?.dateTime && matchesDate(metadata.dateTime, dateFilter));
+
+  const matchesSeverityValue =
+    !severityFilter || getMetadataSeverity(metadata) === severityFilter;
+
+  return (
+    matchesSearchValue &&
+    matchesTypeValue &&
+    matchesDateValue &&
+    matchesSeverityValue
   );
+});
+
 
     useEffect(() => {
   for (const recordingName of filteredRecordings) {
@@ -55,6 +102,7 @@ export function RecordingOverview({
   requestMetadata,
 ]);
 
+
   return (
     <main className="measurements-page">
       <SearchBar
@@ -63,8 +111,38 @@ export function RecordingOverview({
         placeholder="Search recordings..."
       />
 
+      <MobileFilterSheet
+        isOpen={isFilterOpen}
+        onOpen={() => setIsFilterOpen(true)}
+        onClose={() => setIsFilterOpen(false)}
+        typeFilter={typeFilter}
+        dateFilter={dateFilter}
+        severityFilter={severityFilter}
+        onApply={({ typeFilter, dateFilter, severityFilter }) => {
+          setTypeFilter(typeFilter);
+          setDateFilter(dateFilter);
+          setSeverityFilter(severityFilter);
+        }}
+      />
+
+      <div className="desktop-filters">
+      <MeasurementsFilters
+        typeFilter={typeFilter}
+        dateFilter={dateFilter}
+        severityFilter={severityFilter}
+        onTypeChange={setTypeFilter}
+        onDateChange={setDateFilter}
+        onSeverityChange={setSeverityFilter}
+        onClear={() => {
+          setTypeFilter("");
+          setDateFilter("");
+          setSeverityFilter("");
+        }}
+      />
+    </div>
+
       <button type="button" className="recording-back" onClick={onBack}>
-        ← Back to folders
+        Back to folders
       </button>
 
       <section className="measurements-grid">
@@ -89,7 +167,6 @@ export function RecordingOverview({
                   {recordingDate}
                 </span>
               </div>
-
               <div className="recording-card__preview">
                 {thumbnailUrl ? (
                   <Image
