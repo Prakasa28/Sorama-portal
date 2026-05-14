@@ -12,6 +12,7 @@ import {
   type TypeFilter,
 } from "./measurementsFilters";
 import { MobileFilterSheet } from "./mobileFilterSheet";
+import { RecordingPreview } from "./recordingPreview";
 
 
 type Props = {
@@ -40,14 +41,18 @@ const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
 const [dateFilter, setDateFilter] = useState<DateFilter>("");
 const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("");
 const [isFilterOpen, setIsFilterOpen] = useState(false);
+const [selectedRecording, setSelectedRecording] = useState<{
+  name: string;
+  path: string;
+} | null>(null);
   
   
 const filteredRecordings = folder.files.filter((recordingName) => {
   const recordingPath = `${folder.name}/${recordingName}`;
   const metadataKey = `${recordingPath}/metadata.json`;
   const metadata = recordingMetadata[metadataKey];
-  const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
-  const thumbnailUrl = thumbnailUrls[thumbnailKey];
+  // const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
+  // const thumbnailUrl = thumbnailUrls[thumbnailKey];
 
   console.log("Recording filter debug:", {
   recordingName,
@@ -101,6 +106,20 @@ const filteredRecordings = folder.files.filter((recordingName) => {
   requestFile,
   requestMetadata,
 ]);
+
+if (selectedRecording) {
+  return (
+    <RecordingPreview
+      recordingName={selectedRecording.name}
+      recordingPath={selectedRecording.path}
+      fileUrls={thumbnailUrls}
+      recordingMetadata={recordingMetadata}
+      requestFile={requestFile}
+      requestMetadata={requestMetadata}
+      onBack={() => setSelectedRecording(null)}
+    />
+  );
+}
 
 
   return (
@@ -182,7 +201,13 @@ const filteredRecordings = folder.files.filter((recordingName) => {
                 )}
               </div>
 
-              <button type="button" className="recording-card__open">
+              <button type="button" className="recording-card__open" 
+                    onClick={() =>
+                    setSelectedRecording({
+                      name: recordingName,
+                      path: recordingPath,
+                    })
+              }>
                 <Image src="/images/icons/preview.svg" alt="" width={18} height={18} />
                 Open
               </button>
