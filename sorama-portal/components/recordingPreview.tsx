@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PreviewInfoPanel } from "./previewInfoPanel";
 import { PreviewMedia } from "./previewMedia";
 import { shouldShowMetadataPanel } from "../utils/recordingPreviewUtils";
@@ -24,11 +24,14 @@ export function RecordingPreview({
   requestMetadata,
   onBack,
 }: Props) {
+
+  const [mobileView, setMobileView] = useState<"media" | "details">("media");
   const metadataKey = `${recordingPath}/metadata.json`;
   const metadata = recordingMetadata[metadataKey];
 
   const imageUrl = fileUrls[`${recordingPath}/image.jpeg`];
   const videoUrl = fileUrls[`${recordingPath}/video.mp4`];
+  
 
   useEffect(() => {
     if (!metadata) {
@@ -54,12 +57,30 @@ export function RecordingPreview({
         Back to recordings
       </button>
 
+      <div className="recording-preview-toggle">
+        <button
+            type="button"
+            className={mobileView === "media" ? "active" : ""}
+            onClick={() => setMobileView("media")}
+        >
+            Image
+        </button>
+
+        <button
+            type="button"
+            className={mobileView === "details" ? "active" : ""}
+            onClick={() => setMobileView("details")}
+        >
+            Details
+        </button>
+      </div>
+
       <section
-        className={
-          showMetadataPanel
+        className={`${
+            showMetadataPanel
             ? "recording-preview recording-preview--with-info"
             : "recording-preview recording-preview--media-only"
-        }
+         } recording-preview--mobile-${mobileView}`}
       >
         {showMetadataPanel && metadata && (
           <PreviewInfoPanel recordingName={recordingName} metadata={metadata} />
