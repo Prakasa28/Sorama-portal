@@ -13,6 +13,7 @@ import {
 } from "./measurementsFilters";
 import { MobileFilterSheet } from "./mobileFilterSheet";
 import { RecordingPreview } from "./recordingPreview";
+import { getRecordingDownload } from "@/utils/getRecordingDownload";
 
 
 type Props = {
@@ -24,6 +25,8 @@ type Props = {
   requestFile: (folder: string, file: string) => boolean;
   requestMetadata: (folder: string) => boolean;
   onBack: () => void;
+  fileUrls: Record<string, string>;
+  requestDownloadFile: (folder: string, file: string) => boolean;
 };
 
 export function RecordingOverview({
@@ -35,6 +38,8 @@ export function RecordingOverview({
   requestFile,
   requestMetadata,
   onBack,
+  fileUrls,
+  requestDownloadFile,
 }: Props) {
 
 const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
@@ -112,7 +117,7 @@ if (selectedRecording) {
     <RecordingPreview
       recordingName={selectedRecording.name}
       recordingPath={selectedRecording.path}
-      fileUrls={thumbnailUrls}
+      fileUrls={fileUrls}
       recordingMetadata={recordingMetadata}
       requestFile={requestFile}
       requestMetadata={requestMetadata}
@@ -177,6 +182,10 @@ if (selectedRecording) {
             ? new Date(metadata.dateTime).toLocaleString()
             : "Loading date...";
 
+          const downloadConfig = getRecordingDownload(
+          metadata?.type,
+          recordingName);
+
           return (
             <article key={recordingName} className="recording-card">
               <h2 className="recording-card__title">{recordingName}</h2>
@@ -211,6 +220,22 @@ if (selectedRecording) {
                 <Image src="/images/icons/preview.svg" alt="" width={18} height={18} />
                 Open
               </button>
+               
+               <button
+                    type="button"
+                    className="recording-card__download"
+                    onClick={() =>
+                      requestDownloadFile(recordingPath, downloadConfig.file)
+                    }
+                >
+                    <Image
+                      src="/images/icons/download.svg"
+                      alt=""
+                      width={18}
+                      height={18}
+                    />
+                    {downloadConfig.label}
+               </button>
             </article>
           );
         })}

@@ -17,12 +17,14 @@ import { RecordingOverview } from "./recordingOverview";
 type Props = {
   folders: FolderEntry[];
   thumbnailUrls: Record<string, string>;
-  requestFile: (folder: string, file: string) => void;
+  requestFile: (folder: string, file: string) => boolean;
   recordingMetadata: Record<string, any>;
-  requestMetadata: (folder: string) => void;
+  requestMetadata: (folder: string) => boolean;
+  fileUrls: Record<string, string>;
+  requestDownloadFile: (folder: string, file: string) => boolean;
 };
 
-export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recordingMetadata, requestMetadata}:Props) {
+export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recordingMetadata, requestMetadata, fileUrls, requestDownloadFile}:Props) {
    
    const [search, setSearch] = useState("");
    const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
@@ -50,6 +52,8 @@ export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recor
         onSearchChange={setSearch}
         thumbnailUrls={thumbnailUrls}
         requestFile={requestFile}
+        fileUrls={fileUrls}
+        requestDownloadFile={requestDownloadFile}
         onBack={() => setSelectedFolder(null)}
         requestMetadata={requestMetadata}
         recordingMetadata={recordingMetadata}
