@@ -5,28 +5,76 @@
   padding: 24px;
   background: $color-bg;
   color: $color-text-light;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.recording-preview__info {
+  height: 75vh;
+  overflow-y: auto;
+  padding-right: 6px;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(122, 146, 170, 0.7) transparent;
+
+  h1 {
+    margin: 0 0 16px;
+    font-size: 22px;
+  }
+}
+
+.recording-preview__info::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recording-preview__info::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.recording-preview__info::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(122, 146, 170, 0.9),
+    rgba(84, 109, 133, 0.9)
+  );
+
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.recording-preview__info::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(160, 184, 207, 1),
+    rgba(122, 146, 170, 1)
+  );
+}
+
+.recording-back {
+    align-self: flex-start;
+    padding: 8px 14px;
+    border: 1px solid rgba(199, 210, 223, 0.35);
+    border-radius: 50px;
+    background: transparent;
+    color: $color-text-light;  
 }
 
 .recording-preview {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  gap: 40px;
+  gap: 8rem;
 
   &--with-info {
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 310px 1fr;
   }
 
   &--media-only {
     grid-template-columns: 1fr;
     place-items: center;
-  }
-}
-
-.recording-preview__info {
-  h1 {
-    margin: 0 0 16px;
-    font-size: 22px;
   }
 }
 
@@ -68,14 +116,15 @@
 .recording-preview__media {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: center; 
 }
 
 .recording-preview__image,
 .recording-preview__video {
-  max-width: 100%;
+  width: 100%;
   max-height: 75vh;
   border-radius: 10px;
+  display: flex;
 }
 
 .recording-preview-toggle {
@@ -86,6 +135,8 @@
   .recording-preview-page {
     padding: 14px;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .recording-preview {
@@ -93,6 +144,10 @@
     max-width: 100%;
     display: block;
   }
+
+  .recording-back {
+     margin-bottom: 10%;
+}
 
   .recording-preview-toggle {
     display: flex;
@@ -136,6 +191,7 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    height: 100%;
 
     h1 {
       font-size: 18px;
@@ -154,7 +210,7 @@
     }
 
     &__row {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 4px;
       padding: 10px 12px;
 
