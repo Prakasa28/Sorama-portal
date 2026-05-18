@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PreviewInfoPanel } from "./previewInfoPanel";
 import { PreviewMedia } from "./previewMedia";
 import { shouldShowMetadataPanel } from "../utils/recordingPreviewUtils";
+import { getRecordingDownload } from "@/utils/getRecordingDownload";
 
 type Props = {
   recordingName: string;
@@ -12,6 +13,7 @@ type Props = {
   recordingMetadata: Record<string, any>;
   requestFile: (folder: string, file: string) => boolean;
   requestMetadata: (folder: string) => boolean;
+  requestDownloadFile: (folder: string, file: string) => boolean;
   onBack: () => void;
 };
 
@@ -22,6 +24,7 @@ export function RecordingPreview({
   recordingMetadata,
   requestFile,
   requestMetadata,
+  requestDownloadFile,
   onBack,
 }: Props) {
 
@@ -31,6 +34,7 @@ export function RecordingPreview({
 
   const imageUrl = fileUrls[`${recordingPath}/image.jpeg`];
   const videoUrl = fileUrls[`${recordingPath}/video.mp4`];
+  const downloadConfig = getRecordingDownload(metadata?.type, recordingName);
   
 
   useEffect(() => {
@@ -56,7 +60,7 @@ export function RecordingPreview({
       <button type="button" className="recording-back" onClick={onBack}>
         Back to recordings
       </button>
-
+     
       <div className="recording-preview-toggle">
         <button
             type="button"
@@ -74,7 +78,7 @@ export function RecordingPreview({
             Details
         </button>
       </div>
-
+      
       <section
         className={`${
             showMetadataPanel
@@ -85,14 +89,19 @@ export function RecordingPreview({
         {showMetadataPanel && metadata && (
           <PreviewInfoPanel recordingName={recordingName} metadata={metadata} />
         )}
-
+          
         <PreviewMedia
           recordingName={recordingName}
           type={metadata?.type}
           imageUrl={imageUrl}
           videoUrl={videoUrl}
+          downloadLabel={downloadConfig.label}
+          onDownload={() =>
+            requestDownloadFile(recordingPath, downloadConfig.file)
+          }
         />
       </section>
+       
     </main>
   );
 }

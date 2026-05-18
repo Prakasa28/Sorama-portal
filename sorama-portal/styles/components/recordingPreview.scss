@@ -131,6 +131,45 @@
   display: none;
 }
 
+.recording-preview__media-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recording-preview__actions {
+  width: 100%;
+  margin-top: 14px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+.recording-preview__download {
+  height: 42px;
+  padding: 0 18px;
+
+  border: 1px solid rgba(199, 210, 223, 0.18);
+  border-radius: 10px;
+
+  background: rgba(199, 210, 223, 0.08);
+  color: $color-text-light;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(199, 210, 223, 0.14);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 @media (max-width: 700px) {
   .recording-preview-page {
     padding: 14px;
@@ -232,5 +271,14 @@
     .recording-preview__media {
       display: none;
     }
+  }
+
+   .recording-preview__actions {
+    justify-content: center;
+  }
+
+  .recording-preview__download {
+    width: 100%;
+    max-width: 260px;
   }
 }

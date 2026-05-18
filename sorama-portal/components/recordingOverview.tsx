@@ -15,6 +15,7 @@ import { MobileFilterSheet } from "./mobileFilterSheet";
 import { RecordingPreview } from "./recordingPreview";
 import { getRecordingDownload } from "@/utils/getRecordingDownload";
 import JSZip from "jszip";
+import { getReadableType } from "@/utils/recordingPreviewUtils";
 
 
 type Props = {
@@ -125,6 +126,7 @@ if (selectedRecording) {
       recordingPath={selectedRecording.path}
       fileUrls={fileUrls}
       recordingMetadata={recordingMetadata}
+      requestDownloadFile={requestDownloadFile}
       requestFile={requestFile}
       requestMetadata={requestMetadata}
       onBack={() => setSelectedRecording(null)}
@@ -269,11 +271,14 @@ async function requestBlobWithRetry(folder: string, file: string) {
           Select all
         </label>
 
-        {selectedRecordings.length > 0 && (
-          <button type="button" onClick={downloadSelectedAsZip}>
-            Download ZIP ({selectedRecordings.length})
-          </button>
-        )}
+        <button
+          type="button"
+          disabled={selectedRecordings.length === 0}
+          onClick={downloadSelectedAsZip}
+        >
+          Download selected
+          {selectedRecordings.length > 0 && ` (${selectedRecordings.length})`}
+        </button>
       </div>
 
       <section className="measurements-grid">
@@ -309,11 +314,16 @@ async function requestBlobWithRetry(folder: string, file: string) {
 
               <h2 className="recording-card__title">{recordingName}</h2>
 
+              <div className="recording-card__type">
+                {getReadableType(metadata?.type)}
+              </div>
+
               <div className="recording-card__meta">
                 <span className="recording-card__date">
                   {recordingDate}
                 </span>
               </div>
+              
               <div className="recording-card__preview">
                 {thumbnailUrl ? (
                   <Image
