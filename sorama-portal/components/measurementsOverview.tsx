@@ -22,9 +22,10 @@ type Props = {
   requestMetadata: (folder: string) => boolean;
   fileUrls: Record<string, string>;
   requestDownloadFile: (folder: string, file: string) => boolean;
+  requestFileBlob: (folder: string, file: string) => Promise<Blob | null>;
 };
 
-export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recordingMetadata, requestMetadata, fileUrls, requestDownloadFile}:Props) {
+export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recordingMetadata, requestMetadata, fileUrls, requestDownloadFile, requestFileBlob}:Props) {
    
    const [search, setSearch] = useState("");
    const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
@@ -54,6 +55,7 @@ export function MeasurementsOverview({folders, thumbnailUrls, requestFile, recor
         requestFile={requestFile}
         fileUrls={fileUrls}
         requestDownloadFile={requestDownloadFile}
+        requestFileBlob={requestFileBlob}
         onBack={() => setSelectedFolder(null)}
         requestMetadata={requestMetadata}
         recordingMetadata={recordingMetadata}

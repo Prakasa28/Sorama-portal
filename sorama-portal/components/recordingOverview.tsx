@@ -14,6 +14,7 @@ import {
 import { MobileFilterSheet } from "./mobileFilterSheet";
 import { RecordingPreview } from "./recordingPreview";
 import { getRecordingDownload } from "@/utils/getRecordingDownload";
+import JSZip from "jszip";
 
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
   onBack: () => void;
   fileUrls: Record<string, string>;
   requestDownloadFile: (folder: string, file: string) => boolean;
+  requestFileBlob: (folder: string, file: string) => Promise<Blob | null>;
 };
 
 export function RecordingOverview({
@@ -40,6 +42,7 @@ export function RecordingOverview({
   onBack,
   fileUrls,
   requestDownloadFile,
+  requestFileBlob,
 }: Props) {
 
 const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
@@ -50,6 +53,9 @@ const [selectedRecording, setSelectedRecording] = useState<{
   name: string;
   path: string;
 } | null>(null);
+const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
+
+
   
   
 const filteredRecordings = folder.files.filter((recordingName) => {
@@ -126,6 +132,90 @@ if (selectedRecording) {
   );
 }
 
+const allSelected =
+  filteredRecordings.length > 0 &&
+  filteredRecordings.every((name) => selectedRecordings.includes(name));
+
+function toggleRecording(recordingName: string) {
+  setSelectedRecordings((current) =>
+    current.includes(recordingName)
+      ? current.filter((name) => name !== recordingName)
+      : [...current, recordingName]
+  );
+}
+
+function toggleSelectAll() {
+  setSelectedRecordings(allSelected ? [] : filteredRecordings);
+}
+
+async function downloadSelectedAsZip() {
+  for (const recordingName of selectedRecordings) {
+    await downloadSingleRecordingZip(recordingName);
+  }
+}
+
+async function downloadSingleRecordingZip(recordingName: string) {
+  const zip = new JSZip();
+
+  const recordingPath = `${folder.name}/${recordingName}`;
+  const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
+
+  const possibleFiles = ["thumbnail.jpeg", "metadata.json"];
+
+  if (metadata?.type === "video") {
+    possibleFiles.push("video.mp4");
+  } else {
+    possibleFiles.push("image.jpeg");
+  }
+
+  if (
+    metadata?.type === "leakDetection" ||
+    metadata?.type === "partialDischarge" ||
+    metadata?.type === "severityIndex"
+  ) {
+    possibleFiles.push(`Report-${recordingName}.pdf`);
+  }
+
+  for (const file of possibleFiles) {
+    const blob = await requestBlobWithRetry(recordingPath, file);
+
+    if (blob) {
+      zip.file(file, blob);
+    } else {
+      console.warn("Could not add file to ZIP:", recordingPath, file);
+    }
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+
+  downloadBlob(zipBlob, `${recordingName}.zip`);
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+async function requestBlobWithRetry(folder: string, file: string) {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const blob = await requestFileBlob(folder, file);
+
+    if (blob) return blob;
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  return null;
+}
 
   return (
     <main className="measurements-page">
@@ -169,6 +259,23 @@ if (selectedRecording) {
         Back to folders
       </button>
 
+      <div className="recording-selection-bar">
+        <label>
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleSelectAll}
+          />
+          Select all
+        </label>
+
+        {selectedRecordings.length > 0 && (
+          <button type="button" onClick={downloadSelectedAsZip}>
+            Download ZIP ({selectedRecordings.length})
+          </button>
+        )}
+      </div>
+
       <section className="measurements-grid">
         {filteredRecordings.map((recordingName) => {
           const recordingPath = `${folder.name}/${recordingName}`;
@@ -187,7 +294,19 @@ if (selectedRecording) {
           recordingName);
 
           return (
-            <article key={recordingName} className="recording-card">
+            <article key={recordingName}  className={`recording-card ${
+                selectedRecordings.includes(recordingName)
+                  ? "recording-card--selected"
+                  : ""}`}>
+
+               <label className="recording-card__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedRecordings.includes(recordingName)}
+                    onChange={() => toggleRecording(recordingName)}
+                  />
+                </label>
+
               <h2 className="recording-card__title">{recordingName}</h2>
 
               <div className="recording-card__meta">

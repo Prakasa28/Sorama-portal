@@ -5,7 +5,7 @@ import type { FolderEntry } from "../types/measurements";
 
 const SIGNALING_URL = "wss://cloud-signaling-server.onrender.com";
 
-type RequestType = "thumbnail" | "metadata" | "preview" | "download";
+type RequestType = "thumbnail" | "metadata" | "preview" | "download" | "blob";
 
 type CurrentRequest = {
   key: string;
@@ -28,6 +28,7 @@ export function useWebRTC() {
   const [thumbnailUrls, setThumbnailUrls] = useState<Record<string, string>>({});
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
   const [recordingMetadata, setRecordingMetadata] = useState<Record<string, any>>({});
+  const fileBlobResolver = useRef<((blob: Blob | null) => void) | null>(null);
 
   function handleFileComplete() {
     const request = currentRequest.current;
@@ -81,10 +82,16 @@ export function useWebRTC() {
     if (request.type === "download") {
       downloadBlob(blob, request.key);
     }
+     
+    if (request.type === "blob") {
+      fileBlobResolver.current?.(blob);
+      fileBlobResolver.current = null;
+    }
 
     receivedChunks.current = [];
     currentRequest.current = null;
     isRequestingFile.current = false;
+
   }
 
   useEffect(() => {
@@ -241,6 +248,36 @@ export function useWebRTC() {
     return true;
   }
 
+   function requestFileBlob(folder: string, file: string): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const channel = channelRef.current;
+
+    if (!channel || channel.readyState !== "open") {
+      resolve(null);
+      return;
+    }
+
+    if (isRequestingFile.current) {
+      resolve(null);
+      return;
+    }
+
+    const key = `${folder}/${file}`;
+
+    isRequestingFile.current = true;
+    receivedChunks.current = [];
+
+    currentRequest.current = {
+      key,
+      type: "blob",
+    };
+
+    fileBlobResolver.current = resolve;
+
+    channel.send(JSON.stringify({ getFile: { folder, file } }));
+  });
+}
+
   return {
     devices,
     folders,
@@ -251,6 +288,7 @@ export function useWebRTC() {
     requestFile,
     requestDownloadFile,
     requestMetadata,
+    requestFileBlob,
     recordingMetadata,
     thumbnailUrls,
     fileUrls,

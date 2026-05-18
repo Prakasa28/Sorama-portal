@@ -18,6 +18,7 @@ export default function Home() {
     requestMetadata,
     fileUrls,
     requestDownloadFile,
+    requestFileBlob
   } = useWebRTC();
 
   if (!isConnected) {
@@ -42,6 +43,7 @@ export default function Home() {
        requestMetadata={requestMetadata}
        requestDownloadFile={requestDownloadFile}
        recordingMetadata={recordingMetadata}
+       requestFileBlob={requestFileBlob}
        />
       
       </main>
