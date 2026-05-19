@@ -55,6 +55,8 @@ const [selectedRecording, setSelectedRecording] = useState<{
   path: string;
 } | null>(null);
 const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
+const [isZipNameOpen, setIsZipNameOpen] = useState(false);
+const [zipName, setZipName] = useState(`${folder.name}-selected-recordings`);
 
 
   
@@ -150,48 +152,49 @@ function toggleSelectAll() {
   setSelectedRecordings(allSelected ? [] : filteredRecordings);
 }
 
-async function downloadSelectedAsZip() {
-  for (const recordingName of selectedRecordings) {
-    await downloadSingleRecordingZip(recordingName);
-  }
-}
 
-async function downloadSingleRecordingZip(recordingName: string) {
+async function downloadSelectedAsZip() {
   const zip = new JSZip();
 
-  const recordingPath = `${folder.name}/${recordingName}`;
-  const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
+  for (const recordingName of selectedRecordings) {
+    const recordingPath = `${folder.name}/${recordingName}`;
+    const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
 
-  const possibleFiles = ["thumbnail.jpeg", "metadata.json"];
+    const files = ["thumbnail.jpeg", "metadata.json"];
 
-  if (metadata?.type === "video") {
-    possibleFiles.push("video.mp4");
-  } else {
-    possibleFiles.push("image.jpeg");
-  }
-
-  if (
-    metadata?.type === "leakDetection" ||
-    metadata?.type === "partialDischarge" ||
-    metadata?.type === "severityIndex"
-  ) {
-    possibleFiles.push(`Report-${recordingName}.pdf`);
-  }
-
-  for (const file of possibleFiles) {
-    const blob = await requestBlobWithRetry(recordingPath, file);
-
-    if (blob) {
-      zip.file(file, blob);
+    if (metadata?.type === "video") {
+      files.push("video.mp4");
     } else {
-      console.warn("Could not add file to ZIP:", recordingPath, file);
+      files.push("image.jpeg");
+    }
+
+    if (
+      metadata?.type === "leakDetection" ||
+      metadata?.type === "partialDischarge" ||
+      metadata?.type === "severityIndex"
+    ) {
+      files.push(`Report-${recordingName}.pdf`);
+    }
+
+    for (const file of files) {
+      const blob = await requestBlobWithRetry(recordingPath, file);
+
+      if (blob) {
+        zip.file(`${recordingName}/${file}`, blob);
+      } else {
+        console.warn("Could not add file to ZIP:", recordingPath, file);
+      }
     }
   }
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
-  downloadBlob(zipBlob, `${recordingName}.zip`);
+  const safeZipName = zipName.trim() || `${folder.name}-selected-recordings`;
+
+  downloadBlob(zipBlob, `${safeZipName}.zip`);
+  setIsZipNameOpen(false);
 }
+
 
 function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
@@ -274,12 +277,37 @@ async function requestBlobWithRetry(folder: string, file: string) {
         <button
           type="button"
           disabled={selectedRecordings.length === 0}
-          onClick={downloadSelectedAsZip}
+          onClick={() => setIsZipNameOpen(true)}
         >
           Download selected
           {selectedRecordings.length > 0 && ` (${selectedRecordings.length})`}
         </button>
       </div>
+
+      {isZipNameOpen && (
+        <div className="zip-modal">
+          <div className="zip-modal__panel">
+            <h2>Name your ZIP file</h2>
+
+            <input
+              type="text"
+              value={zipName}
+              onChange={(event) => setZipName(event.target.value)}
+              placeholder="Enter ZIP file name"
+            />
+
+            <div className="zip-modal__actions">
+              <button type="button" onClick={() => setIsZipNameOpen(false)}>
+                Cancel
+              </button>
+
+              <button type="button" onClick={downloadSelectedAsZip}>
+                Download ZIP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="measurements-grid">
         {filteredRecordings.map((recordingName) => {
