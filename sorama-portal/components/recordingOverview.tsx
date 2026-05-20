@@ -152,6 +152,35 @@ function toggleSelectAll() {
   setSelectedRecordings(allSelected ? [] : filteredRecordings);
 }
 
+function getRecordingEntry(recordingName: string) {
+  return folder.recordings?.find(
+    (recording) => recording.name === recordingName
+  );
+}
+
+function getFilesForRecording(recordingName: string, metadata: any) {
+  const recording = getRecordingEntry(recordingName);
+
+  const files = ["metadata.json"];
+
+  if (recording?.thumbnail) {
+    files.push(recording.thumbnail);
+  }
+
+  if (metadata?.type === "video" && recording?.video) {
+    files.push(recording.video);
+  }
+
+  if (metadata?.type !== "video" && recording?.image) {
+    files.push(recording.image);
+  }
+
+  if (recording?.report) {
+    files.push(recording.report);
+  }
+
+  return files;
+}
 
 async function downloadSelectedAsZip() {
   const zip = new JSZip();
@@ -160,21 +189,7 @@ async function downloadSelectedAsZip() {
     const recordingPath = `${folder.name}/${recordingName}`;
     const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
 
-    const files = ["thumbnail.jpeg", "metadata.json"];
-
-    if (metadata?.type === "video") {
-      files.push("video.mp4");
-    } else {
-      files.push("image.jpeg");
-    }
-
-    if (
-      metadata?.type === "leakDetection" ||
-      metadata?.type === "partialDischarge" ||
-      metadata?.type === "severityIndex"
-    ) {
-      files.push(`Report-${recordingName}.pdf`);
-    }
+    const files = getFilesForRecording(recordingName, metadata);
 
     for (const file of files) {
       const blob = await requestBlobWithRetry(recordingPath, file);
@@ -317,14 +332,19 @@ async function requestBlobWithRetry(folder: string, file: string) {
 
           const thumbnailUrl = thumbnailUrls[thumbnailKey];
           const metadata = recordingMetadata[metadataKey];
+          const recording = getRecordingEntry(recordingName);
 
           const recordingDate = metadata?.dateTime
             ? new Date(metadata.dateTime).toLocaleString()
             : "Loading date...";
 
-          const downloadConfig = getRecordingDownload(
-          metadata?.type,
-          recordingName);
+           const downloadConfig = getRecordingDownload(
+              metadata?.type,
+              recordingName,
+              recording?.report,
+              recording?.image,
+              recording?.video
+            );
 
           return (
             <article key={recordingName}  className={`recording-card ${

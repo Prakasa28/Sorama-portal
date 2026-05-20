@@ -1,18 +1,21 @@
 export function getRecordingDownload(
   metadataType?: string,
-  recordingName?: string
+  recordingName?: string,
+  reportFile?: string,
+  imageFile?: string,
+  videoFile?: string
 ) {
   switch (metadataType) {
     case "image":
       return {
         label: "Download Image",
-        file: "image.jpeg",
+        file: imageFile ?? "",
       };
 
     case "video":
       return {
         label: "Download Video",
-        file: "video.mp4",
+        file: videoFile ?? "",
       };
 
     case "leakDetection":
@@ -20,7 +23,7 @@ export function getRecordingDownload(
     case "severityIndex":
       return {
         label: "Download Report",
-        file: `Report-${recordingName}.pdf`,
+        file: reportFile ?? "",
       };
 
     default:
