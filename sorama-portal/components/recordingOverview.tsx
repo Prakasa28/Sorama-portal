@@ -16,6 +16,7 @@ import { RecordingPreview } from "./recordingPreview";
 import { getRecordingDownload } from "@/utils/getRecordingDownload";
 import JSZip from "jszip";
 import { getReadableType } from "@/utils/recordingPreviewUtils";
+import { PDFDocument } from "pdf-lib";
 
 
 type Props = {
@@ -57,6 +58,8 @@ const [selectedRecording, setSelectedRecording] = useState<{
 const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
 const [isZipNameOpen, setIsZipNameOpen] = useState(false);
 const [zipName, setZipName] = useState(`${folder.name}-selected-recordings`);
+const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
+const [downloadMode, setDownloadMode] = useState<"zip" | "mergedPdf">("zip");
 
 
   
@@ -210,6 +213,54 @@ async function downloadSelectedAsZip() {
   setIsZipNameOpen(false);
 }
 
+function isReportType(type?: string) {
+  return (
+    type === "leakDetection" ||
+    type === "partialDischarge" ||
+    type === "severityIndex"
+  );
+}
+
+async function downloadSelectedReportsAsMergedPdf() {
+  const mergedPdf = await PDFDocument.create();
+
+  for (const recordingName of selectedRecordings) {
+    const recordingPath = `${folder.name}/${recordingName}`;
+    const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
+
+    if (!isReportType(metadata?.type)) continue;
+
+    const recording = getRecordingEntry(recordingName);
+    const reportFile = recording?.report;
+
+    if (!reportFile) continue;
+
+    const blob = await requestBlobWithRetry(recordingPath, reportFile);
+    if (!blob) continue;
+
+    const bytes = await blob.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+    pages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  if (mergedPdf.getPageCount() === 0) {
+    alert("No report PDFs found in the selected recordings.");
+    return;
+  }
+
+  const mergedBytes = await mergedPdf.save();
+  const mergedBlob = new Blob([mergedBytes.buffer as ArrayBuffer], {
+    type: "application/pdf",
+  });
+
+  const safeName = zipName.trim() || `${folder.name}-merged-reports`;
+
+  downloadBlob(mergedBlob, `${safeName}.pdf`);
+  setIsZipNameOpen(false);
+}
+
 
 function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
@@ -236,6 +287,7 @@ async function requestBlobWithRetry(folder: string, file: string) {
 
   return null;
 }
+
 
   return (
     <main className="measurements-page">
@@ -289,20 +341,56 @@ async function requestBlobWithRetry(folder: string, file: string) {
           Select all
         </label>
 
+        <div className="recording-download-menu">
+  <button
+    type="button"
+    disabled={selectedRecordings.length === 0}
+    onClick={() => setIsDownloadMenuOpen((current) => !current)}
+  >
+    Download selected
+    {selectedRecordings.length > 0 && ` (${selectedRecordings.length})`}
+  </button>
+
+  {isDownloadMenuOpen && selectedRecordings.length > 0 && (
+    <div className="recording-download-dropdown">
         <button
           type="button"
-          disabled={selectedRecordings.length === 0}
-          onClick={() => setIsZipNameOpen(true)}
+          className="recording-download-dropdown__item"
+          onClick={() => {
+            setDownloadMode("zip");
+            setZipName(`${folder.name}-selected-recordings`);
+            setIsZipNameOpen(true);
+            setIsDownloadMenuOpen(false);
+          }}
         >
-          Download selected
-          {selectedRecordings.length > 0 && ` (${selectedRecordings.length})`}
+          Download as ZIP
         </button>
+
+        <button
+          type="button"
+          className="recording-download-dropdown__item"
+          onClick={() => {
+            setDownloadMode("mergedPdf");
+            setZipName(`${folder.name}-merged-reports`);
+            setIsZipNameOpen(true);
+            setIsDownloadMenuOpen(false);
+          }}
+        >
+          Merge reports into PDF
+        </button>
+     </div>
+        )}
+      </div>
       </div>
 
       {isZipNameOpen && (
         <div className="zip-modal">
           <div className="zip-modal__panel">
-            <h2>Name your ZIP file</h2>
+            <h2>
+              {downloadMode === "zip"
+                ? "Name your ZIP file"
+                : "Name your merged PDF"}
+            </h2>
 
             <input
               type="text"
@@ -316,8 +404,15 @@ async function requestBlobWithRetry(folder: string, file: string) {
                 Cancel
               </button>
 
-              <button type="button" onClick={downloadSelectedAsZip}>
-                Download ZIP
+              <button
+                type="button"
+                onClick={
+                  downloadMode === "zip"
+                    ? downloadSelectedAsZip
+                    : downloadSelectedReportsAsMergedPdf
+                }
+              >
+                {downloadMode === "zip" ? "Download ZIP" : "Download PDF"}
               </button>
             </div>
           </div>
