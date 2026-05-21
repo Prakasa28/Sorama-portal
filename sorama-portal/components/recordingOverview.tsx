@@ -1,22 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import type { FolderEntry } from "../types/measurements";
+
 import { SearchBar } from "./searchBar";
-import { matchesDate, getMetadataSeverity, } from "../utils/measurementsFilters";
-import {
-  MeasurementsFilters,
-  type DateFilter,
-  type SeverityFilter,
-  type TypeFilter,
-} from "./measurementsFilters";
+import { MeasurementsFilters, type DateFilter, type SeverityFilter, type TypeFilter } from "./measurementsFilters";
 import { MobileFilterSheet } from "./mobileFilterSheet";
 import { RecordingPreview } from "./recordingPreview";
-import { getRecordingDownload } from "@/utils/getRecordingDownload";
-import JSZip from "jszip";
-import { getReadableType } from "@/utils/recordingPreviewUtils";
+import { RecordingCard } from "./recordingCard";
+import { RecordingSelectionBar } from "./recordingSelectionBar";
+import { DownloadNameModal } from "./downloadNameModal";
 
+import { matchesDate, getMetadataSeverity } from "../utils/measurementsFilters";
+import { getRecordingDownload } from "@/utils/getRecordingDownload";
+import { useRecordingExports } from "../hooks/useRecordingExports";
 
 type Props = {
   folder: FolderEntry;
@@ -45,182 +42,129 @@ export function RecordingOverview({
   requestDownloadFile,
   requestFileBlob,
 }: Props) {
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("");
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-const [typeFilter, setTypeFilter] = useState<TypeFilter>("");
-const [dateFilter, setDateFilter] = useState<DateFilter>("");
-const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("");
-const [isFilterOpen, setIsFilterOpen] = useState(false);
-const [selectedRecording, setSelectedRecording] = useState<{
-  name: string;
-  path: string;
-} | null>(null);
-const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
-const [isZipNameOpen, setIsZipNameOpen] = useState(false);
-const [zipName, setZipName] = useState(`${folder.name}-selected-recordings`);
+  const [selectedRecording, setSelectedRecording] = useState<{
+    name: string;
+    path: string;
+  } | null>(null);
 
+  const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
+  const [isDownloadNameOpen, setIsDownloadNameOpen] = useState(false);
+  const [downloadName, setDownloadName] = useState(`${folder.name}-selected-recordings`);
+  const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
+  const [downloadMode, setDownloadMode] = useState<"zip" | "mergedPdf">("zip");
 
-  
-  
-const filteredRecordings = folder.files.filter((recordingName) => {
-  const recordingPath = `${folder.name}/${recordingName}`;
-  const metadataKey = `${recordingPath}/metadata.json`;
-  const metadata = recordingMetadata[metadataKey];
-  // const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
-  // const thumbnailUrl = thumbnailUrls[thumbnailKey];
+  const {
+    getRecordingEntry,
+    downloadSelectedAsZip,
+    downloadSelectedReportsAsMergedPdf,
+  } = useRecordingExports({
+    folder,
+    selectedRecordings,
+    recordingMetadata,
+    requestFileBlob,
+  });
 
-  console.log("Recording filter debug:", {
-  recordingName,
-  metadataKey,
-  metadata,
-});
-
-  const matchesSearchValue = recordingName
-    .toLowerCase()
-    .includes(search.toLowerCase().trim());
-
-  const matchesTypeValue =
-  !typeFilter || metadata?.type === typeFilter;
-
-  const matchesDateValue =
-    !dateFilter || (metadata?.dateTime && matchesDate(metadata.dateTime, dateFilter));
-
-  const matchesSeverityValue =
-    !severityFilter || getMetadataSeverity(metadata) === severityFilter;
-
-  return (
-    matchesSearchValue &&
-    matchesTypeValue &&
-    matchesDateValue &&
-    matchesSeverityValue
-  );
-});
-
-
-    useEffect(() => {
-  for (const recordingName of filteredRecordings) {
-    const recordingPath = `${folder.name}/${recordingName}`;
-    const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
-    const metadataKey = `${recordingPath}/metadata.json`;
-
-    if (!thumbnailUrls[thumbnailKey]) {
-      const started = requestFile(recordingPath, "thumbnail.jpeg");
-      if (started) return;
-    }
-
-    if (!recordingMetadata[metadataKey]) {
-      const started = requestMetadata(recordingPath);
-      if (started) return;
-    }
-  }
-}, [
-  folder.name,
-  filteredRecordings,
-  thumbnailUrls,
-  recordingMetadata,
-  requestFile,
-  requestMetadata,
-]);
-
-if (selectedRecording) {
-  return (
-    <RecordingPreview
-      recordingName={selectedRecording.name}
-      recordingPath={selectedRecording.path}
-      fileUrls={fileUrls}
-      recordingMetadata={recordingMetadata}
-      requestDownloadFile={requestDownloadFile}
-      requestFile={requestFile}
-      requestMetadata={requestMetadata}
-      onBack={() => setSelectedRecording(null)}
-    />
-  );
-}
-
-const allSelected =
-  filteredRecordings.length > 0 &&
-  filteredRecordings.every((name) => selectedRecordings.includes(name));
-
-function toggleRecording(recordingName: string) {
-  setSelectedRecordings((current) =>
-    current.includes(recordingName)
-      ? current.filter((name) => name !== recordingName)
-      : [...current, recordingName]
-  );
-}
-
-function toggleSelectAll() {
-  setSelectedRecordings(allSelected ? [] : filteredRecordings);
-}
-
-
-async function downloadSelectedAsZip() {
-  const zip = new JSZip();
-
-  for (const recordingName of selectedRecordings) {
+  const filteredRecordings = folder.files.filter((recordingName) => {
     const recordingPath = `${folder.name}/${recordingName}`;
     const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
 
-    const files = ["thumbnail.jpeg", "metadata.json"];
+    const matchesSearchValue = recordingName
+      .toLowerCase()
+      .includes(search.toLowerCase().trim());
 
-    if (metadata?.type === "video") {
-      files.push("video.mp4");
-    } else {
-      files.push("image.jpeg");
-    }
+    const matchesTypeValue = !typeFilter || metadata?.type === typeFilter;
 
-    if (
-      metadata?.type === "leakDetection" ||
-      metadata?.type === "partialDischarge" ||
-      metadata?.type === "severityIndex"
-    ) {
-      files.push(`Report-${recordingName}.pdf`);
-    }
+    const matchesDateValue =
+      !dateFilter ||
+      (metadata?.dateTime && matchesDate(metadata.dateTime, dateFilter));
 
-    for (const file of files) {
-      const blob = await requestBlobWithRetry(recordingPath, file);
+    const matchesSeverityValue =
+      !severityFilter || getMetadataSeverity(metadata) === severityFilter;
 
-      if (blob) {
-        zip.file(`${recordingName}/${file}`, blob);
-      } else {
-        console.warn("Could not add file to ZIP:", recordingPath, file);
+    return (
+      matchesSearchValue &&
+      matchesTypeValue &&
+      matchesDateValue &&
+      matchesSeverityValue
+    );
+  });
+
+  useEffect(() => {
+    for (const recordingName of filteredRecordings) {
+      const recordingPath = `${folder.name}/${recordingName}`;
+      const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
+      const metadataKey = `${recordingPath}/metadata.json`;
+
+      if (!thumbnailUrls[thumbnailKey]) {
+        const started = requestFile(recordingPath, "thumbnail.jpeg");
+        if (started) return;
+      }
+
+      if (!recordingMetadata[metadataKey]) {
+        const started = requestMetadata(recordingPath);
+        if (started) return;
       }
     }
+  }, [
+    folder.name,
+    filteredRecordings,
+    thumbnailUrls,
+    recordingMetadata,
+    requestFile,
+    requestMetadata,
+  ]);
+
+  if (selectedRecording) {
+    return (
+      <RecordingPreview
+        recordingName={selectedRecording.name}
+        recordingPath={selectedRecording.path}
+        fileUrls={fileUrls}
+        recordingMetadata={recordingMetadata}
+        requestDownloadFile={requestDownloadFile}
+        requestFile={requestFile}
+        requestMetadata={requestMetadata}
+        onBack={() => setSelectedRecording(null)}
+      />
+    );
   }
 
-  const zipBlob = await zip.generateAsync({ type: "blob" });
+  const allSelected =
+    filteredRecordings.length > 0 &&
+    filteredRecordings.every((name) => selectedRecordings.includes(name));
 
-  const safeZipName = zipName.trim() || `${folder.name}-selected-recordings`;
-
-  downloadBlob(zipBlob, `${safeZipName}.zip`);
-  setIsZipNameOpen(false);
-}
-
-
-function downloadBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = fileName;
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  URL.revokeObjectURL(url);
-}
-
-async function requestBlobWithRetry(folder: string, file: string) {
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const blob = await requestFileBlob(folder, file);
-
-    if (blob) return blob;
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
+  function toggleRecording(recordingName: string) {
+    setSelectedRecordings((current) =>
+      current.includes(recordingName)
+        ? current.filter((name) => name !== recordingName)
+        : [...current, recordingName]
+    );
   }
 
-  return null;
-}
+  function toggleSelectAll() {
+    setSelectedRecordings(allSelected ? [] : filteredRecordings);
+  }
+
+  async function handleNamedDownload() {
+    const safeName =
+      downloadName.trim() ||
+      (downloadMode === "zip"
+        ? `${folder.name}-selected-recordings`
+        : `${folder.name}-merged-reports`);
+
+    if (downloadMode === "zip") {
+      await downloadSelectedAsZip(safeName);
+    } else {
+      await downloadSelectedReportsAsMergedPdf(safeName);
+    }
+
+    setIsDownloadNameOpen(false);
+  }
 
   return (
     <main className="measurements-page">
@@ -245,155 +189,94 @@ async function requestBlobWithRetry(folder: string, file: string) {
       />
 
       <div className="desktop-filters">
-      <MeasurementsFilters
-        typeFilter={typeFilter}
-        dateFilter={dateFilter}
-        severityFilter={severityFilter}
-        onTypeChange={setTypeFilter}
-        onDateChange={setDateFilter}
-        onSeverityChange={setSeverityFilter}
-        onClear={() => {
-          setTypeFilter("");
-          setDateFilter("");
-          setSeverityFilter("");
-        }}
-      />
-    </div>
+        <MeasurementsFilters
+          typeFilter={typeFilter}
+          dateFilter={dateFilter}
+          severityFilter={severityFilter}
+          onTypeChange={setTypeFilter}
+          onDateChange={setDateFilter}
+          onSeverityChange={setSeverityFilter}
+          onClear={() => {
+            setTypeFilter("");
+            setDateFilter("");
+            setSeverityFilter("");
+          }}
+        />
+      </div>
 
       <button type="button" className="recording-back" onClick={onBack}>
         Back to folders
       </button>
 
-      <div className="recording-selection-bar">
-        <label>
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={toggleSelectAll}
-          />
-          Select all
-        </label>
+      <RecordingSelectionBar
+        allSelected={allSelected}
+        selectedCount={selectedRecordings.length}
+        isDownloadMenuOpen={isDownloadMenuOpen}
+        onToggleSelectAll={toggleSelectAll}
+        onToggleDownloadMenu={() =>
+          setIsDownloadMenuOpen((current) => !current)
+        }
+        onDownloadZip={() => {
+          setDownloadMode("zip");
+          setDownloadName(`${folder.name}-selected-recordings`);
+          setIsDownloadNameOpen(true);
+          setIsDownloadMenuOpen(false);
+        }}
+        onMergePdf={() => {
+          setDownloadMode("mergedPdf");
+          setDownloadName(`${folder.name}-merged-reports`);
+          setIsDownloadNameOpen(true);
+          setIsDownloadMenuOpen(false);
+        }}
+      />
 
-        <button
-          type="button"
-          disabled={selectedRecordings.length === 0}
-          onClick={() => setIsZipNameOpen(true)}
-        >
-          Download selected
-          {selectedRecordings.length > 0 && ` (${selectedRecordings.length})`}
-        </button>
-      </div>
-
-      {isZipNameOpen && (
-        <div className="zip-modal">
-          <div className="zip-modal__panel">
-            <h2>Name your ZIP file</h2>
-
-            <input
-              type="text"
-              value={zipName}
-              onChange={(event) => setZipName(event.target.value)}
-              placeholder="Enter ZIP file name"
-            />
-
-            <div className="zip-modal__actions">
-              <button type="button" onClick={() => setIsZipNameOpen(false)}>
-                Cancel
-              </button>
-
-              <button type="button" onClick={downloadSelectedAsZip}>
-                Download ZIP
-              </button>
-            </div>
-          </div>
-        </div>
+      {isDownloadNameOpen && (
+        <DownloadNameModal
+          mode={downloadMode}
+          value={downloadName}
+          onChange={setDownloadName}
+          onCancel={() => setIsDownloadNameOpen(false)}
+          onDownload={handleNamedDownload}
+        />
       )}
 
       <section className="measurements-grid">
         {filteredRecordings.map((recordingName) => {
           const recordingPath = `${folder.name}/${recordingName}`;
-          const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
           const metadataKey = `${recordingPath}/metadata.json`;
+          const thumbnailKey = `${recordingPath}/thumbnail.jpeg`;
 
-          const thumbnailUrl = thumbnailUrls[thumbnailKey];
           const metadata = recordingMetadata[metadataKey];
-
-          const recordingDate = metadata?.dateTime
-            ? new Date(metadata.dateTime).toLocaleString()
-            : "Loading date...";
+          const thumbnailUrl = thumbnailUrls[thumbnailKey];
+          const recording = getRecordingEntry(recordingName);
 
           const downloadConfig = getRecordingDownload(
-          metadata?.type,
-          recordingName);
+            metadata?.type,
+            recordingName,
+            recording?.report,
+            recording?.image,
+            recording?.video
+          );
 
           return (
-            <article key={recordingName}  className={`recording-card ${
-                selectedRecordings.includes(recordingName)
-                  ? "recording-card--selected"
-                  : ""}`}>
-
-               <label className="recording-card__checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedRecordings.includes(recordingName)}
-                    onChange={() => toggleRecording(recordingName)}
-                  />
-                </label>
-
-              <h2 className="recording-card__title">{recordingName}</h2>
-
-              <div className="recording-card__type">
-                {getReadableType(metadata?.type)}
-              </div>
-
-              <div className="recording-card__meta">
-                <span className="recording-card__date">
-                  {recordingDate}
-                </span>
-              </div>
-              
-              <div className="recording-card__preview">
-                {thumbnailUrl ? (
-                  <Image
-                    src={thumbnailUrl}
-                    alt={recordingName}
-                    width={260}
-                    height={220}
-                    className="recording-card__thumbnail"
-                    unoptimized
-                  />
-                ) : (
-                  <p className="recording-card__loading">Loading...</p>
-                )}
-              </div>
-
-              <button type="button" className="recording-card__open" 
-                    onClick={() =>
-                    setSelectedRecording({
-                      name: recordingName,
-                      path: recordingPath,
-                    })
-              }>
-                <Image src="/images/icons/preview.svg" alt="" width={18} height={18} />
-                Open
-              </button>
-               
-               <button
-                    type="button"
-                    className="recording-card__download"
-                    onClick={() =>
-                      requestDownloadFile(recordingPath, downloadConfig.file)
-                    }
-                >
-                    <Image
-                      src="/images/icons/download.svg"
-                      alt=""
-                      width={18}
-                      height={18}
-                    />
-                    {downloadConfig.label}
-               </button>
-            </article>
+            <RecordingCard
+              key={recordingName}
+              recordingName={recordingName}
+              metadata={metadata}
+              thumbnailUrl={thumbnailUrl}
+              isSelected={selectedRecordings.includes(recordingName)}
+              downloadLabel={downloadConfig.label}
+              onToggleSelect={() => toggleRecording(recordingName)}
+              onOpen={() =>
+                setSelectedRecording({
+                  name: recordingName,
+                  path: recordingPath,
+                })
+              }
+              onDownload={() =>
+                requestDownloadFile(recordingPath, downloadConfig.file)
+              }
+            />
           );
         })}
       </section>

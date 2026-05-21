@@ -273,3 +273,46 @@
   }
 }
 
+.recording-download-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.recording-download-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
+
+  padding: 6px;
+  border-radius: 12px;
+  background: #20344a;
+  border: 1px solid rgba(199, 210, 223, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recording-download-dropdown__item {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
