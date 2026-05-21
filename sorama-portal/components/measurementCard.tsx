@@ -9,13 +9,13 @@ type Props = {
 export function MeasurementCard({ folder, onClick }: Props) {
   return (
     <article className="measurement-card" onClick={onClick}>
-        <Image 
+        {/* <Image 
           src="/images/icons/more.svg" 
           alt="more options" 
           className="measurement-card__more-icon" 
           width={24} 
           height={24} 
-          />
+          /> */}
       <p className="measurement-card__title">{folder.name}</p>
       <div className="measurement-card__preview">
         <Image
