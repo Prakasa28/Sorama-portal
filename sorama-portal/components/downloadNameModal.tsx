@@ -6,19 +6,11 @@ type Props = {
   onDownload: () => void;
 };
 
-export function DownloadNameModal({
-  mode,
-  value,
-  onChange,
-  onCancel,
-  onDownload,
-}: Props) {
+export function DownloadNameModal({ mode, value, onChange, onCancel, onDownload }: Props) {
   return (
     <div className="zip-modal">
       <div className="zip-modal__panel">
-        <h2>
-          {mode === "zip" ? "Name your ZIP file" : "Name your merged PDF"}
-        </h2>
+        <h2>{mode === "zip" ? "Name your ZIP file" : "Name your merged PDF"}</h2>
 
         <input
           type="text"
@@ -28,10 +20,7 @@ export function DownloadNameModal({
         />
 
         <div className="zip-modal__actions">
-          <button type="button" onClick={onCancel}>
-            Cancel
-          </button>
-
+          <button type="button" onClick={onCancel}>Cancel</button>
           <button type="button" onClick={onDownload}>
             {mode === "zip" ? "Download ZIP" : "Download PDF"}
           </button>

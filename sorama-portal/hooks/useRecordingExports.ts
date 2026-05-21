@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import type { FolderEntry } from "../types/measurements";
@@ -17,9 +18,7 @@ export function useRecordingExports({
   requestFileBlob,
 }: Props) {
   function getRecordingEntry(recordingName: string) {
-    return folder.recordings?.find(
-      (recording) => recording.name === recordingName
-    );
+    return folder.recordings?.find((r) => r.name === recordingName);
   }
 
   function getFilesForRecording(recordingName: string, metadata: any) {
@@ -27,15 +26,8 @@ export function useRecordingExports({
     const files = ["metadata.json"];
 
     if (recording?.thumbnail) files.push(recording.thumbnail);
-
-    if (metadata?.type === "video" && recording?.video) {
-      files.push(recording.video);
-    }
-
-    if (metadata?.type !== "video" && recording?.image) {
-      files.push(recording.image);
-    }
-
+    if (metadata?.type === "video" && recording?.video) files.push(recording.video);
+    if (metadata?.type !== "video" && recording?.image) files.push(recording.image);
     if (recording?.report) files.push(recording.report);
 
     return files;
@@ -45,46 +37,53 @@ export function useRecordingExports({
     for (let attempt = 0; attempt < 20; attempt++) {
       const blob = await requestFileBlob(folderPath, file);
       if (blob) return blob;
-
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
-
     return null;
   }
 
   async function downloadSelectedAsZip(fileName: string) {
     const zip = new JSZip();
+    const toastId = toast.loading("Starting download...");
 
-    for (const recordingName of selectedRecordings) {
+    const allFiles = selectedRecordings.flatMap((recordingName) => {
       const recordingPath = `${folder.name}/${recordingName}`;
       const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
-      const files = getFilesForRecording(recordingName, metadata);
+      return getFilesForRecording(recordingName, metadata).map((file) => ({
+        recordingName,
+        recordingPath,
+        file,
+      }));
+    });
 
-      for (const file of files) {
-        const blob = await requestBlobWithRetry(recordingPath, file);
-
-        if (blob) {
-          zip.file(`${recordingName}/${file}`, blob);
-        }
-      }
+    for (const [i, { recordingName, recordingPath, file }] of allFiles.entries()) {
+      toast.loading(`Fetching file ${i + 1} of ${allFiles.length} — ${recordingName}`, { id: toastId });
+      const blob = await requestBlobWithRetry(recordingPath, file);
+      if (blob) zip.file(`${recordingName}/${file}`, blob);
     }
 
+    toast.loading("Generating ZIP...", { id: toastId });
     const zipBlob = await zip.generateAsync({ type: "blob" });
     downloadBlob(zipBlob, `${fileName}.zip`);
+
+    toast.success("ZIP downloaded!", { id: toastId });
   }
 
   async function downloadSelectedReportsAsMergedPdf(fileName: string) {
     const mergedPdf = await PDFDocument.create();
+    const toastId = toast.loading("Starting PDF merge...");
 
-    for (const recordingName of selectedRecordings) {
+    const reportRecordings = selectedRecordings.filter((recordingName) => {
       const recordingPath = `${folder.name}/${recordingName}`;
       const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
+      return isReportType(metadata?.type) && getRecordingEntry(recordingName)?.report;
+    });
 
-      if (!isReportType(metadata?.type)) continue;
+    for (const [i, recordingName] of reportRecordings.entries()) {
+      toast.loading(`Processing ${i + 1} of ${reportRecordings.length} — ${recordingName}`, { id: toastId });
 
-      const recording = getRecordingEntry(recordingName);
-      const reportFile = recording?.report;
-
+      const recordingPath = `${folder.name}/${recordingName}`;
+      const reportFile = getRecordingEntry(recordingName)?.report;
       if (!reportFile) continue;
 
       const blob = await requestBlobWithRetry(recordingPath, reportFile);
@@ -93,22 +92,20 @@ export function useRecordingExports({
       const bytes = await blob.arrayBuffer();
       const pdf = await PDFDocument.load(bytes);
       const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-
       pages.forEach((page) => mergedPdf.addPage(page));
     }
 
     if (mergedPdf.getPageCount() === 0) {
-      alert("No report PDFs found in the selected recordings.");
+      toast.error("No report PDFs found in the selected recordings.", { id: toastId });
       return;
     }
 
+    toast.loading("Saving PDF...", { id: toastId });
     const mergedBytes = await mergedPdf.save();
-
-    const mergedBlob = new Blob([mergedBytes.buffer as ArrayBuffer], {
-      type: "application/pdf",
-    });
-
+    const mergedBlob = new Blob([mergedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
     downloadBlob(mergedBlob, `${fileName}.pdf`);
+
+    toast.success("PDF downloaded!", { id: toastId });
   }
 
   return {
@@ -119,9 +116,5 @@ export function useRecordingExports({
 }
 
 function isReportType(type?: string) {
-  return (
-    type === "leakDetection" ||
-    type === "partialDischarge" ||
-    type === "severityIndex"
-  );
+  return type === "leakDetection" || type === "partialDischarge" || type === "severityIndex";
 }
