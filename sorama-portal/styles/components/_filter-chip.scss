@@ -46,11 +46,11 @@
     border-color 0.2s ease,
     transform 0.1s ease;
 
-    option {
-        background: $color-surface;
-        color: $color-primary;
-        border-radius: 10px;
-    }
+  option {
+    background: $color-surface;
+    color: $color-primary;
+    border-radius: 10px;
+  }
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.11);

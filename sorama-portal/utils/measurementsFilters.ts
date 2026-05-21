@@ -1,9 +1,5 @@
 import type { FolderEntry, MeasurementMetadata } from "../types/measurements";
-import type {
-  DateFilter,
-  SeverityFilter,
-  TypeFilter,
-} from "../components/measurementsFilters";
+import type { DateFilter, SeverityFilter, TypeFilter } from "../components/measurementsFilters";
 
 export function matchesSearch(folder: FolderEntry, search: string) {
   return folder.name.toLowerCase().includes(search.toLowerCase().trim());
@@ -38,9 +34,7 @@ export function matchesSeverity(folder: FolderEntry, filter: SeverityFilter) {
   return getMetadataSeverity(folder.metadata) === filter;
 }
 
-export function getMetadataSeverity(
-  metadata?: MeasurementMetadata | null
-): SeverityFilter {
+export function getMetadataSeverity(metadata?: MeasurementMetadata | null): SeverityFilter {
   if (!metadata) return "";
 
   if (metadata.type === "leakDetection") {

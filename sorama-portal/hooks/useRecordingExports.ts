@@ -57,7 +57,9 @@ export function useRecordingExports({
     });
 
     for (const [i, { recordingName, recordingPath, file }] of allFiles.entries()) {
-      toast.loading(`Fetching file ${i + 1} of ${allFiles.length} — ${recordingName}`, { id: toastId });
+      toast.loading(`Fetching file ${i + 1} of ${allFiles.length} — ${recordingName}`, {
+        id: toastId,
+      });
       const blob = await requestBlobWithRetry(recordingPath, file);
       if (blob) zip.file(`${recordingName}/${file}`, blob);
     }
@@ -80,7 +82,9 @@ export function useRecordingExports({
     });
 
     for (const [i, recordingName] of reportRecordings.entries()) {
-      toast.loading(`Processing ${i + 1} of ${reportRecordings.length} — ${recordingName}`, { id: toastId });
+      toast.loading(`Processing ${i + 1} of ${reportRecordings.length} — ${recordingName}`, {
+        id: toastId,
+      });
 
       const recordingPath = `${folder.name}/${recordingName}`;
       const reportFile = getRecordingEntry(recordingName)?.report;

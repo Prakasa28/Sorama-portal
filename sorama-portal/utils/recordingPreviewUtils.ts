@@ -9,11 +9,7 @@ export function getReadableType(type?: string) {
 }
 
 export function shouldShowMetadataPanel(type?: string) {
-  return (
-    type === "leakDetection" ||
-    type === "partialDischarge" ||
-    type === "severityIndex"
-  );
+  return type === "leakDetection" || type === "partialDischarge" || type === "severityIndex";
 }
 
 export function formatDate(dateTime?: string) {

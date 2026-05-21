@@ -34,11 +34,7 @@
 }
 
 .recording-preview__info::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    rgba(122, 146, 170, 0.9),
-    rgba(84, 109, 133, 0.9)
-  );
+  background: linear-gradient(180deg, rgba(122, 146, 170, 0.9), rgba(84, 109, 133, 0.9));
 
   border-radius: 999px;
   border: 2px solid transparent;
@@ -46,20 +42,16 @@
 }
 
 .recording-preview__info::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    rgba(160, 184, 207, 1),
-    rgba(122, 146, 170, 1)
-  );
+  background: linear-gradient(180deg, rgba(160, 184, 207, 1), rgba(122, 146, 170, 1));
 }
 
 .recording-back {
-    align-self: flex-start;
-    padding: 8px 14px;
-    border: 1px solid rgba(199, 210, 223, 0.35);
-    border-radius: 50px;
-    background: transparent;
-    color: $color-text-light;  
+  align-self: flex-start;
+  padding: 8px 14px;
+  border: 1px solid rgba(199, 210, 223, 0.35);
+  border-radius: 50px;
+  background: transparent;
+  color: $color-text-light;
 }
 
 .recording-preview {
@@ -116,7 +108,7 @@
 .recording-preview__media {
   display: flex;
   align-items: flex-start;
-  justify-content: center; 
+  justify-content: center;
 }
 
 .recording-preview__image,
@@ -185,8 +177,8 @@
   }
 
   .recording-back {
-     margin-bottom: 10%;
-}
+    margin-bottom: 10%;
+  }
 
   .recording-preview-toggle {
     display: flex;
@@ -273,7 +265,7 @@
     }
   }
 
-   .recording-preview__actions {
+  .recording-preview__actions {
     justify-content: center;
   }
 

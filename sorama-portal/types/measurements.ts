@@ -1,4 +1,3 @@
-
 export type MeasurementType = "leakDetection" | "partialDischarge";
 
 export type RecordingEntry = {

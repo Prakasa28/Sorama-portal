@@ -6,11 +6,7 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-export function SearchBar({
-  value,
-  placeholder = "Search...",
-  onChange,
-}: Props) {
+export function SearchBar({ value, placeholder = "Search...", onChange }: Props) {
   return (
     <div className="search-bar">
       <Search className="search-bar__icon" />

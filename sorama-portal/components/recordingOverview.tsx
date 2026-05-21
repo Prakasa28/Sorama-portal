@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import type { FolderEntry } from "../types/measurements";
 
 import { SearchBar } from "./searchBar";
-import { MeasurementsFilters, type DateFilter, type SeverityFilter, type TypeFilter } from "./measurementsFilters";
+import {
+  MeasurementsFilters,
+  type DateFilter,
+  type SeverityFilter,
+  type TypeFilter,
+} from "./measurementsFilters";
 import { MobileFilterSheet } from "./mobileFilterSheet";
 import { RecordingPreview } from "./recordingPreview";
 import { RecordingCard } from "./recordingCard";
@@ -58,40 +63,29 @@ export function RecordingOverview({
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
   const [downloadMode, setDownloadMode] = useState<"zip" | "mergedPdf">("zip");
 
-  const {
-    getRecordingEntry,
-    downloadSelectedAsZip,
-    downloadSelectedReportsAsMergedPdf,
-  } = useRecordingExports({
-    folder,
-    selectedRecordings,
-    recordingMetadata,
-    requestFileBlob,
-  });
+  const { getRecordingEntry, downloadSelectedAsZip, downloadSelectedReportsAsMergedPdf } =
+    useRecordingExports({
+      folder,
+      selectedRecordings,
+      recordingMetadata,
+      requestFileBlob,
+    });
 
   const filteredRecordings = folder.files.filter((recordingName) => {
     const recordingPath = `${folder.name}/${recordingName}`;
     const metadata = recordingMetadata[`${recordingPath}/metadata.json`];
 
-    const matchesSearchValue = recordingName
-      .toLowerCase()
-      .includes(search.toLowerCase().trim());
+    const matchesSearchValue = recordingName.toLowerCase().includes(search.toLowerCase().trim());
 
     const matchesTypeValue = !typeFilter || metadata?.type === typeFilter;
 
     const matchesDateValue =
-      !dateFilter ||
-      (metadata?.dateTime && matchesDate(metadata.dateTime, dateFilter));
+      !dateFilter || (metadata?.dateTime && matchesDate(metadata.dateTime, dateFilter));
 
     const matchesSeverityValue =
       !severityFilter || getMetadataSeverity(metadata) === severityFilter;
 
-    return (
-      matchesSearchValue &&
-      matchesTypeValue &&
-      matchesDateValue &&
-      matchesSeverityValue
-    );
+    return matchesSearchValue && matchesTypeValue && matchesDateValue && matchesSeverityValue;
   });
 
   useEffect(() => {
@@ -168,11 +162,7 @@ export function RecordingOverview({
 
   return (
     <main className="measurements-page">
-      <SearchBar
-        value={search}
-        onChange={onSearchChange}
-        placeholder="Search recordings..."
-      />
+      <SearchBar value={search} onChange={onSearchChange} placeholder="Search recordings..." />
 
       <MobileFilterSheet
         isOpen={isFilterOpen}
@@ -213,9 +203,7 @@ export function RecordingOverview({
         selectedCount={selectedRecordings.length}
         isDownloadMenuOpen={isDownloadMenuOpen}
         onToggleSelectAll={toggleSelectAll}
-        onToggleDownloadMenu={() =>
-          setIsDownloadMenuOpen((current) => !current)
-        }
+        onToggleDownloadMenu={() => setIsDownloadMenuOpen((current) => !current)}
         onDownloadZip={() => {
           setDownloadMode("zip");
           setDownloadName(`${folder.name}-selected-recordings`);
@@ -273,9 +261,7 @@ export function RecordingOverview({
                   path: recordingPath,
                 })
               }
-              onDownload={() =>
-                requestDownloadFile(recordingPath, downloadConfig.file)
-              }
+              onDownload={() => requestDownloadFile(recordingPath, downloadConfig.file)}
             />
           );
         })}

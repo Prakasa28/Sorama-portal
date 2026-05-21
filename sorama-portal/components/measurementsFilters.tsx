@@ -69,11 +69,7 @@ export function MeasurementsFilters({
       />
 
       {hasFilters && (
-        <button
-          type="button"
-          className="filter-chip filter-chip--button"
-          onClick={onClear}
-        >
+        <button type="button" className="filter-chip filter-chip--button" onClick={onClear}>
           Clear
         </button>
       )}

@@ -36,8 +36,7 @@ export function MobileFilterSheet({
 }: Props) {
   const [draftType, setDraftType] = useState<TypeFilter>(typeFilter);
   const [draftDate, setDraftDate] = useState<DateFilter>(dateFilter);
-  const [draftSeverity, setDraftSeverity] =
-    useState<SeverityFilter>(severityFilter);
+  const [draftSeverity, setDraftSeverity] = useState<SeverityFilter>(severityFilter);
 
   useEffect(() => {
     if (!isOpen) return;

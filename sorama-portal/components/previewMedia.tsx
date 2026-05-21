@@ -5,7 +5,6 @@ type Props = {
   type?: string;
   imageUrl?: string;
   videoUrl?: string;
-
   downloadLabel?: string;
   onDownload?: () => void;
 };
@@ -22,11 +21,7 @@ export function PreviewMedia({
     <div className="recording-preview__media-wrapper">
       <div className="recording-preview__media">
         {type === "video" && videoUrl ? (
-          <video
-            src={videoUrl}
-            controls
-            className="recording-preview__video"
-          />
+          <video src={videoUrl} controls className="recording-preview__video" />
         ) : imageUrl ? (
           <Image
             src={imageUrl}

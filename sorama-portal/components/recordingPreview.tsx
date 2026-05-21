@@ -27,7 +27,6 @@ export function RecordingPreview({
   requestDownloadFile,
   onBack,
 }: Props) {
-
   const [mobileView, setMobileView] = useState<"media" | "details">("media");
   const metadataKey = `${recordingPath}/metadata.json`;
   const metadata = recordingMetadata[metadataKey];
@@ -35,7 +34,6 @@ export function RecordingPreview({
   const imageUrl = fileUrls[`${recordingPath}/image.jpeg`];
   const videoUrl = fileUrls[`${recordingPath}/video.mp4`];
   const downloadConfig = getRecordingDownload(metadata?.type, recordingName);
-  
 
   useEffect(() => {
     if (!metadata) {
@@ -60,48 +58,45 @@ export function RecordingPreview({
       <button type="button" className="recording-back" onClick={onBack}>
         Back to recordings
       </button>
-     
+
       <div className="recording-preview-toggle">
         <button
-            type="button"
-            className={mobileView === "media" ? "active" : ""}
-            onClick={() => setMobileView("media")}
+          type="button"
+          className={mobileView === "media" ? "active" : ""}
+          onClick={() => setMobileView("media")}
         >
-            Image
+          Image
         </button>
 
         <button
-            type="button"
-            className={mobileView === "details" ? "active" : ""}
-            onClick={() => setMobileView("details")}
+          type="button"
+          className={mobileView === "details" ? "active" : ""}
+          onClick={() => setMobileView("details")}
         >
-            Details
+          Details
         </button>
       </div>
-      
+
       <section
         className={`${
-            showMetadataPanel
+          showMetadataPanel
             ? "recording-preview recording-preview--with-info"
             : "recording-preview recording-preview--media-only"
-         } recording-preview--mobile-${mobileView}`}
+        } recording-preview--mobile-${mobileView}`}
       >
         {showMetadataPanel && metadata && (
           <PreviewInfoPanel recordingName={recordingName} metadata={metadata} />
         )}
-          
+
         <PreviewMedia
           recordingName={recordingName}
           type={metadata?.type}
           imageUrl={imageUrl}
           videoUrl={videoUrl}
           downloadLabel={downloadConfig.label}
-          onDownload={() =>
-            requestDownloadFile(recordingPath, downloadConfig.file)
-          }
+          onDownload={() => requestDownloadFile(recordingPath, downloadConfig.file)}
         />
       </section>
-       
     </main>
   );
 }

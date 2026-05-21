@@ -1,8 +1,7 @@
-
 @use "../abstracts/variables" as *;
 
 .measurements-page {
-   min-height: calc(100dvh - $menu-bar-height);
+  min-height: calc(100dvh - $menu-bar-height);
   background: $color-bg;
   padding: $spacing-lg;
 }

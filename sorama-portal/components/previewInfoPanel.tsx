@@ -1,9 +1,5 @@
 import { PreviewSection } from "./previewSection";
-import {
-  formatDate,
-  formatValue,
-  getReadableType,
-} from "../utils/recordingPreviewUtils";
+import { formatDate, formatValue, getReadableType } from "../utils/recordingPreviewUtils";
 
 type Props = {
   recordingName: string;
@@ -15,9 +11,7 @@ export function PreviewInfoPanel({ recordingName, metadata }: Props) {
     <aside className="recording-preview__info">
       <h1>{recordingName}</h1>
 
-      <p className="recording-preview__type">
-        {getReadableType(metadata.type)}
-      </p>
+      <p className="recording-preview__type">{getReadableType(metadata.type)}</p>
 
       <p>{formatDate(metadata.dateTime)}</p>
 
@@ -93,10 +87,7 @@ export function PreviewInfoPanel({ recordingName, metadata }: Props) {
         <PreviewSection
           title="Partial Discharge Inspection Information"
           rows={[
-            [
-              "Operating frequency",
-              metadata.pdMetadata?.settings?.operatingConditions || "-",
-            ],
+            ["Operating frequency", metadata.pdMetadata?.settings?.operatingConditions || "-"],
             ["External", `${metadata.pdMetadata?.results?.externalPercentage ?? "-"}%`],
             ["Internal", `${metadata.pdMetadata?.results?.internalPercentage ?? "-"}%`],
             ["Tracking", `${metadata.pdMetadata?.results?.trackingPercentage ?? "-"}%`],
@@ -108,18 +99,11 @@ export function PreviewInfoPanel({ recordingName, metadata }: Props) {
       {metadata.type === "severityIndex" && (
         <PreviewSection
           title="Severity Index Information"
-          rows={[
-            [
-              "Severity Index",
-              metadata.lsMetadata?.results?.severityIndex ?? "-",
-            ],
-          ]}
+          rows={[["Severity Index", metadata.lsMetadata?.results?.severityIndex ?? "-"]]}
         />
       )}
 
-      {metadata.notes && (
-        <PreviewSection title="Notes" rows={[["Notes", metadata.notes]]} />
-      )}
+      {metadata.notes && <PreviewSection title="Notes" rows={[["Notes", metadata.notes]]} />}
     </aside>
   );
 }

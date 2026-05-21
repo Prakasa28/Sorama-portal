@@ -37,11 +37,7 @@ export function useWebRTC() {
     const extension = request.key.split(".").pop()?.toLowerCase();
 
     const mimeType =
-      extension === "pdf"
-        ? "application/pdf"
-        : extension === "mp4"
-        ? "video/mp4"
-        : "image/jpeg";
+      extension === "pdf" ? "application/pdf" : extension === "mp4" ? "video/mp4" : "image/jpeg";
 
     const blob = new Blob(receivedChunks.current, { type: mimeType });
 
@@ -82,7 +78,7 @@ export function useWebRTC() {
     if (request.type === "download") {
       downloadBlob(blob, request.key);
     }
-     
+
     if (request.type === "blob") {
       fileBlobResolver.current?.(blob);
       fileBlobResolver.current = null;
@@ -91,7 +87,6 @@ export function useWebRTC() {
     receivedChunks.current = [];
     currentRequest.current = null;
     isRequestingFile.current = false;
-
   }
 
   useEffect(() => {
@@ -203,9 +198,7 @@ export function useWebRTC() {
   }
 
   function reloadDevices() {
-    wsRef.current?.send(
-      JSON.stringify({ role: "browser", action: "listRooms" })
-    );
+    wsRef.current?.send(JSON.stringify({ role: "browser", action: "listRooms" }));
   }
 
   function requestFile(folder: string, file: string): boolean {
@@ -220,11 +213,7 @@ export function useWebRTC() {
     return requestFile(folder, "metadata.json");
   }
 
-  function startFileRequest(
-    folder: string,
-    file: string,
-    type: RequestType
-  ): boolean {
+  function startFileRequest(folder: string, file: string, type: RequestType): boolean {
     const channel = channelRef.current;
 
     if (!channel || channel.readyState !== "open") {
@@ -248,35 +237,35 @@ export function useWebRTC() {
     return true;
   }
 
-   function requestFileBlob(folder: string, file: string): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    const channel = channelRef.current;
+  function requestFileBlob(folder: string, file: string): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const channel = channelRef.current;
 
-    if (!channel || channel.readyState !== "open") {
-      resolve(null);
-      return;
-    }
+      if (!channel || channel.readyState !== "open") {
+        resolve(null);
+        return;
+      }
 
-    if (isRequestingFile.current) {
-      resolve(null);
-      return;
-    }
+      if (isRequestingFile.current) {
+        resolve(null);
+        return;
+      }
 
-    const key = `${folder}/${file}`;
+      const key = `${folder}/${file}`;
 
-    isRequestingFile.current = true;
-    receivedChunks.current = [];
+      isRequestingFile.current = true;
+      receivedChunks.current = [];
 
-    currentRequest.current = {
-      key,
-      type: "blob",
-    };
+      currentRequest.current = {
+        key,
+        type: "blob",
+      };
 
-    fileBlobResolver.current = resolve;
+      fileBlobResolver.current = resolve;
 
-    channel.send(JSON.stringify({ getFile: { folder, file } }));
-  });
-}
+      channel.send(JSON.stringify({ getFile: { folder, file } }));
+    });
+  }
 
   return {
     devices,

@@ -27,20 +27,14 @@ export function RecordingCard({
     : "Loading date...";
 
   return (
-    <article
-      className={`recording-card ${
-        isSelected ? "recording-card--selected" : ""
-      }`}
-    >
+    <article className={`recording-card ${isSelected ? "recording-card--selected" : ""}`}>
       <label className="recording-card__checkbox">
         <input type="checkbox" checked={isSelected} onChange={onToggleSelect} />
       </label>
 
       <h2 className="recording-card__title">{recordingName}</h2>
 
-      <div className="recording-card__type">
-        {getReadableType(metadata?.type)}
-      </div>
+      <div className="recording-card__type">{getReadableType(metadata?.type)}</div>
 
       <div className="recording-card__meta">
         <span className="recording-card__date">{recordingDate}</span>
@@ -66,11 +60,7 @@ export function RecordingCard({
         Open
       </button>
 
-      <button
-        type="button"
-        className="recording-card__download"
-        onClick={onDownload}
-      >
+      <button type="button" className="recording-card__download" onClick={onDownload}>
         <Image src="/images/icons/download.svg" alt="" width={18} height={18} />
         {downloadLabel}
       </button>

@@ -20,20 +20,12 @@ export function RecordingSelectionBar({
   return (
     <div className="recording-selection-bar">
       <label>
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={onToggleSelectAll}
-        />
+        <input type="checkbox" checked={allSelected} onChange={onToggleSelectAll} />
         Select all
       </label>
 
       <div className="recording-download-menu">
-        <button
-          type="button"
-          disabled={selectedCount === 0}
-          onClick={onToggleDownloadMenu}
-        >
+        <button type="button" disabled={selectedCount === 0} onClick={onToggleDownloadMenu}>
           Download selected
           {selectedCount > 0 && ` (${selectedCount})`}
         </button>

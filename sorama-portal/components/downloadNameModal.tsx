@@ -20,7 +20,9 @@ export function DownloadNameModal({ mode, value, onChange, onCancel, onDownload 
         />
 
         <div className="zip-modal__actions">
-          <button type="button" onClick={onCancel}>Cancel</button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
           <button type="button" onClick={onDownload}>
             {mode === "zip" ? "Download ZIP" : "Download PDF"}
           </button>

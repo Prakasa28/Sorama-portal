@@ -1,11 +1,11 @@
 "use client";
 
 import { useWebRTC } from "../hooks/useWebRTC";
-import { MeasurementsOverview } from "../components/measurementsOverview"
+import { MeasurementsOverview } from "../components/measurementsOverview";
 import { DeviceDiscovery } from "../components/deviceDiscovery";
 
 export default function Home() {
-  const{
+  const {
     devices,
     folders,
     selectedDevice,
@@ -18,7 +18,7 @@ export default function Home() {
     requestMetadata,
     fileUrls,
     requestDownloadFile,
-    requestFileBlob
+    requestFileBlob,
   } = useWebRTC();
 
   if (!isConnected) {
@@ -35,17 +35,16 @@ export default function Home() {
   return (
     <div>
       <main>
-      <MeasurementsOverview
-       folders={folders}
-       thumbnailUrls={thumbnailUrls}
-       fileUrls={fileUrls}
-       requestFile={requestFile}
-       requestMetadata={requestMetadata}
-       requestDownloadFile={requestDownloadFile}
-       recordingMetadata={recordingMetadata}
-       requestFileBlob={requestFileBlob}
-       />
-      
+        <MeasurementsOverview
+          folders={folders}
+          thumbnailUrls={thumbnailUrls}
+          fileUrls={fileUrls}
+          requestFile={requestFile}
+          requestMetadata={requestMetadata}
+          requestDownloadFile={requestDownloadFile}
+          recordingMetadata={recordingMetadata}
+          requestFileBlob={requestFileBlob}
+        />
       </main>
     </div>
   );

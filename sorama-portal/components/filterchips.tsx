@@ -11,11 +11,7 @@ type Props<T extends string> = {
   onChange: (value: T) => void;
 };
 
-export function FilterChip<T extends string>({
-  value,
-  options,
-  onChange,
-}: Props<T>) {
+export function FilterChip<T extends string>({ value, options, onChange }: Props<T>) {
   return (
     <div className="filter-chip-wrapper">
       <select

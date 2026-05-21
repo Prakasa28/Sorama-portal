@@ -20,18 +20,13 @@ export function DeviceDiscovery({
   return (
     <main className="device-discovery-page">
       <header className="device-discovery-header">
-        <Image
-          src="/images/icons/sorama-logo.svg"
-          alt="Sorama logo"
-          width={70}
-          height={70}
-        />
+        <Image src="/images/icons/sorama-logo.svg" alt="Sorama logo" width={70} height={70} />
         <h1>Welcome to Sorama Portal</h1>
       </header>
 
       <section className="device-discovery-card">
         <h2>Device management</h2>
-         <p>Select a device to connect it with the Sorama Portal</p>
+        <p>Select a device to connect it with the Sorama Portal</p>
 
         <div className="device-list">
           {devices.length === 0 ? (
@@ -44,13 +39,13 @@ export function DeviceDiscovery({
                 className="device-item"
                 onClick={() => onSelectDevice(device)}
               >
-                  <Image
-                src="/images/icons/device.svg"
-                alt=""
-                width={34}
-                height={34}
-                className="device-item__icon"
-              />
+                <Image
+                  src="/images/icons/device.svg"
+                  alt=""
+                  width={34}
+                  height={34}
+                  className="device-item__icon"
+                />
                 <span>{device}</span>
               </button>
             ))
@@ -59,17 +54,13 @@ export function DeviceDiscovery({
 
         {selectedDevice && (
           <p className="device-status">
-            {isConnected
-              ? `Connected to ${selectedDevice}`
-              : `Connecting to ${selectedDevice}...`}
+            {isConnected ? `Connected to ${selectedDevice}` : `Connecting to ${selectedDevice}...`}
           </p>
         )}
 
-        <button 
-        type="button" 
-        className="device-reload"
-        onClick={onReloadDevices}
-        >Reload & look for devices</button>
+        <button type="button" className="device-reload" onClick={onReloadDevices}>
+          Reload & look for devices
+        </button>
       </section>
     </main>
   );
