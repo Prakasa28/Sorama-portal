@@ -15,6 +15,7 @@ export type FolderEntry = {
   name: string;
   files: string[];
   recordings?: RecordingEntry[];
+  metadata?: MeasurementMetadata | null;
 };
 
 export type MeasurementMetadata = {
