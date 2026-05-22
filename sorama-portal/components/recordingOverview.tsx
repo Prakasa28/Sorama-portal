@@ -55,6 +55,7 @@ export function RecordingOverview({
   const [selectedRecording, setSelectedRecording] = useState<{
     name: string;
     path: string;
+    downloadFile: string;
   } | null>(null);
 
   const [selectedRecordings, setSelectedRecordings] = useState<string[]>([]);
@@ -118,6 +119,7 @@ export function RecordingOverview({
       <RecordingPreview
         recordingName={selectedRecording.name}
         recordingPath={selectedRecording.path}
+        downloadFile={selectedRecording.downloadFile}
         fileUrls={fileUrls}
         recordingMetadata={recordingMetadata}
         requestDownloadFile={requestDownloadFile}
@@ -259,6 +261,7 @@ export function RecordingOverview({
                 setSelectedRecording({
                   name: recordingName,
                   path: recordingPath,
+                  downloadFile: downloadConfig.file,
                 })
               }
               onDownload={() => requestDownloadFile(recordingPath, downloadConfig.file)}

@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { PreviewInfoPanel } from "./previewInfoPanel";
 import { PreviewMedia } from "./previewMedia";
-import { shouldShowMetadataPanel } from "../utils/recordingPreviewUtils";
+import { shouldShowMetadataPanel, getReadableType } from "../utils/recordingPreviewUtils";
 import { getRecordingDownload } from "@/utils/getRecordingDownload";
 
 type Props = {
   recordingName: string;
   recordingPath: string;
+  downloadFile: string;
   fileUrls: Record<string, string>;
   recordingMetadata: Record<string, any>;
   requestFile: (folder: string, file: string) => boolean;
@@ -20,6 +21,7 @@ type Props = {
 export function RecordingPreview({
   recordingName,
   recordingPath,
+  downloadFile,
   fileUrls,
   recordingMetadata,
   requestFile,
@@ -33,7 +35,7 @@ export function RecordingPreview({
 
   const imageUrl = fileUrls[`${recordingPath}/image.jpeg`];
   const videoUrl = fileUrls[`${recordingPath}/video.mp4`];
-  const downloadConfig = getRecordingDownload(metadata?.type, recordingName);
+  const downloadLabel = getRecordingDownload(metadata?.type, recordingName).label;
 
   useEffect(() => {
     if (!metadata) {
@@ -93,8 +95,8 @@ export function RecordingPreview({
           type={metadata?.type}
           imageUrl={imageUrl}
           videoUrl={videoUrl}
-          downloadLabel={downloadConfig.label}
-          onDownload={() => requestDownloadFile(recordingPath, downloadConfig.file)}
+          downloadLabel={downloadLabel}
+          onDownload={downloadFile ? () => requestDownloadFile(recordingPath, downloadFile) : undefined}
         />
       </section>
     </main>
