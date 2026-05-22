@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ImageIcon, FileText } from "lucide-react";
 import { PreviewInfoPanel } from "./previewInfoPanel";
 import { PreviewMedia } from "./previewMedia";
-import { shouldShowMetadataPanel, getReadableType } from "../utils/recordingPreviewUtils";
+import { shouldShowMetadataPanel } from "../utils/recordingPreviewUtils";
 import { getRecordingDownload } from "@/utils/getRecordingDownload";
 
 type Props = {
@@ -54,6 +55,7 @@ export function RecordingPreview({
   }, [metadata, imageUrl, videoUrl, recordingPath, requestFile, requestMetadata]);
 
   const showMetadataPanel = shouldShowMetadataPanel(metadata?.type);
+  const hideToggle = metadata?.type === "video" || metadata?.type === "image";
 
   return (
     <main className="recording-preview-page">
@@ -61,23 +63,25 @@ export function RecordingPreview({
         Back to recordings
       </button>
 
-      <div className="recording-preview-toggle">
+      {!hideToggle && <div className="recording-preview-toggle">
         <button
           type="button"
           className={mobileView === "media" ? "active" : ""}
           onClick={() => setMobileView("media")}
+          aria-label="Image view"
         >
-          Image
+          <ImageIcon size={18} />
         </button>
 
         <button
           type="button"
           className={mobileView === "details" ? "active" : ""}
           onClick={() => setMobileView("details")}
+          aria-label="Details view"
         >
-          Details
+          <FileText size={18} />
         </button>
-      </div>
+      </div>}
 
       <section
         className={`${
